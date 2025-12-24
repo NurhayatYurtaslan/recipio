@@ -1,0 +1,11 @@
+{
+  "Header": {
+    "search": "Ara...",
+    "recipes": "Tarifler",
+    "login": "Giriş Yap",
+    "profile": "Profil"
+  },
+  "HomePage": {
+    "featuredRecipes": "Öne Çıkan Tarifler"
+  }
+}

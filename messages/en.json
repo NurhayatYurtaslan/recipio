@@ -1,0 +1,11 @@
+{
+  "Header": {
+    "search": "Search...",
+    "recipes": "Recipes",
+    "login": "Login",
+    "profile": "Profile"
+  },
+  "HomePage": {
+    "featuredRecipes": "Featured Recipes"
+  }
+}
