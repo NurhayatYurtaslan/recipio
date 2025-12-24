@@ -1,15 +1,12 @@
-import createMiddleware from 'next-intl/middleware';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default createMiddleware({
-  // A list of all locales that are supported
-  locales: ['en', 'tr'],
-
-  // If this locale is matched, pathnames work without a prefix (e.g. `/about`)
-  defaultLocale: 'en'
-});
+export function middleware(request: NextRequest) {
+  // Simple middleware - can be extended later
+  return NextResponse.next();
+}
 
 export const config = {
-  // Skip all paths that should not be internationalized. This example skips
-  // certain folders and all pathnames with a dot (e.g. favicon.ico)
+  // Match all paths except static files and API routes
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };

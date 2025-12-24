@@ -9,14 +9,8 @@ type Props = {
 
 export function Providers({ children }: Props) {
     return (
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                {children}
-            </motion.div>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+            {children}
         </ThemeProvider>
     );
 }

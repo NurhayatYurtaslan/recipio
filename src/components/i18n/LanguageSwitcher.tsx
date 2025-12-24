@@ -1,8 +1,7 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next-intl/client';
+import { usePathname, useRouter } from 'next/navigation';
 import { Languages } from 'lucide-react';
 
 export default function LanguageSwitcher() {
@@ -12,14 +11,16 @@ export default function LanguageSwitcher() {
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const nextLocale = e.target.value;
-        router.replace(pathname, { locale: nextLocale });
+        // Remove current locale from pathname and add new one
+        const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/';
+        router.push(`/${nextLocale}${pathWithoutLocale}`);
     };
 
     return (
         <div className="relative">
             <Languages className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <select
-                defaultValue={locale}
+                value={locale}
                 onChange={handleChange}
                 className="pl-9 pr-4 py-2 text-sm rounded-md border bg-transparent appearance-none"
             >
