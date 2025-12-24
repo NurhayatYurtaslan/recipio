@@ -40,12 +40,13 @@ Components will be organized by feature under `src/components/`.
     -   `LanguageSwitcher.tsx`: Dropdown to switch between `en` and `tr`.
 -   **`components/layout/`**: Page layout containers and grids.
 -   **`components/recipe/`**: Components related to displaying recipes.
-    -   `RecipeCard.tsx`: Compact card for recipe lists.
-    -   `RecipeDetail.tsx`: Full recipe page view.
-    -   `RecipeForm.tsx`: Form for submitting/editing recipes (UGC).
-    -   `ServingsStepper.tsx`: UI to switch between `1, 2, 3, 4` servings.
-    -   `IngredientsList.tsx`: Displays ingredients for a selected variant.
-    -   `StepsList.tsx`: Displays recipe steps.
+    -   `RecipeCard.tsx`: ✅ Compact card for recipe lists (displays title, description, image, stats, category).
+    -   `RecipeDetail.tsx`: ✅ Full recipe page view (includes servings selector, ingredients list, steps).
+    -   `RecipeList.tsx`: ✅ Grid layout component that fetches and displays recipes from `v_public_recipe_cards`.
+    -   `RecipeForm.tsx`: Form for submitting/editing recipes (UGC) - to be created.
+    -   `ServingsStepper.tsx`: ✅ Integrated into `RecipeDetail` as a dropdown selector.
+    -   `IngredientsList.tsx`: ✅ Integrated into `RecipeDetail` component.
+    -   `StepsList.tsx`: ✅ Integrated into `RecipeDetail` component.
 -   **`components/ui/`**: Generic, reusable UI elements (inspired by shadcn/ui).
     -   `Button.tsx`
     -   `Card.tsx`
@@ -66,10 +67,11 @@ The database schema is designed around the core entities: `recipes`, `users`, `c
 -   **Tables:** See `docs/DB_SCHEMA.md` for the full schema.
 -   **SQL Views:** The application will heavily rely on pre-defined SQL views to simplify queries, encapsulate logic, and respect RLS policies.
     -   `v_public_recipe_cards`: Powers all public recipe listing pages.
-    -   `v_recipe_detail`: Fetches all data for a single recipe page.
-    -   `v_variant_ingredients`: Fetches ingredients for a specific serving size.
-    -   `v_admin_pending_recipes`: For the admin moderation queue.
-    -   `v_user_library`: For listing a user's favorited/saved recipes.
+    -   `v_recipe_stats`: Aggregated statistics (view_count, favorite_count, etc.)
+    -   `v_public_recipe_cards`: ✅ For recipe listing pages (homepage, recipe list) - includes title, description, stats, category.
+    -   `v_recipe_detail`: ✅ Fetches ALL data for a single recipe page in ONE query - includes translations, steps, all variants (1,2,3,4 servings) with ingredients (TR/EN), stats, categories.
+    -   `v_admin_pending_recipes`: For the admin moderation queue (to be implemented).
+    -   `v_user_library`: For listing a user's favorited/saved recipes (to be implemented).
 -   **RLS Strategy:**
     -   **Anon:** Can read `published` & `is_free` recipes and their related content. Can only create `view` events.
     -   **Auth User:** Can read all `published` recipes plus their own non-published ones. Can create engagement records (`favorites`, `comments`, etc.) and `pending` recipes.

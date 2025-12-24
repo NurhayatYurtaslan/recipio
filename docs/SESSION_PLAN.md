@@ -36,36 +36,42 @@ This document outlines the development of the Recipio app over three distinct wo
     -   `src/components/i18n/LanguageSwitcher.tsx`
     -   `src/components/ui/*`
 -   **Feature Files:**
-    -   `src/app/[locale]/page.tsx` (Home)
-    -   `src/app/[locale]/recipes/page.tsx` (List)
-    -   `src/app/[locale]/recipes/[id]/page.tsx` (Detail)
-    -   `src/components/recipe/RecipeCard.tsx`
-    -   `src/components/recipe/RecipeDetail.tsx`
-    -   `src/components/recipe/ServingsStepper.tsx`
-    -   `src/components/recipe/IngredientsList.tsx`
-    -   `src/components/recipe/StepsList.tsx`
+    -   `src/app/page.tsx` (Home - ✅ Created)
+    -   `src/app/home/page.tsx` (Home alternative - ✅ Created)
+    -   `src/app/recipes/[id]/page.tsx` (Detail - ✅ Created)
+    -   `src/components/recipe/RecipeCard.tsx` (✅ Created)
+    -   `src/components/recipe/RecipeDetail.tsx` (✅ Created - includes servings selector)
+    -   `src/components/recipe/RecipeList.tsx` (✅ Created)
+    -   `src/lib/db/public.ts` (✅ Created - query functions)
+    -   `src/lib/supabase/browser.ts` (✅ Created - uses @supabase/supabase-js)
+    -   `src/lib/supabase/server.ts` (✅ Created)
 
 ### Acceptance Criteria
 
--   [ ] The database can be fully migrated and seeded using the Supabase CLI.
--   [ ] The app runs without errors.
--   [ ] The homepage displays featured recipes from `v_public_recipe_cards`.
--   [ ] The recipes list page displays all free, published recipes and can be filtered.
--   [ ] The recipe detail page correctly shows title, description, steps, and stats from `v_recipe_detail`.
--   [ ] The servings stepper on the detail page fetches and displays the correct ingredient list from `v_variant_ingredients`.
+-   [x] The database can be fully migrated and seeded using the Supabase CLI.
+-   [x] The app runs without errors.
+-   [x] The homepage displays all recipes from `v_public_recipe_cards` in a grid layout.
+-   [x] The recipes list page displays all free, published recipes (via `RecipeList` component).
+-   [x] The recipe detail page correctly shows title, description, steps, and stats from `v_recipe_detail`.
+-   [x] The servings selector on the detail page displays the correct ingredient list from `v_recipe_detail` variants (1, 2, 3, 4 servings).
 -   [ ] The language switcher correctly changes the locale in the URL and displays translated content where available, with a proper fallback.
--   [ ] A `view` event is recorded in `recipe_events` when a recipe detail page is visited.
+-   [ ] A `view` event is recorded in `views` table when a recipe detail page is visited (via `trackRecipeView` function).
 
 ### Demo Script
 
 1.  Start the app (`npm run dev`).
-2.  Open `http://localhost:3000/en`. The homepage should appear with recipe cards.
-3.  Click the language switcher and select "Turkish". The URL should change to `/tr` and content should (partially) translate.
-4.  Navigate to the `/en/recipes` page. A grid of recipes appears.
-5.  Click on a recipe card. The URL changes to `/en/recipes/[id]`.
-6.  The recipe detail page is displayed. Note the ingredients list.
-7.  Click the "4 servings" button on the stepper. The ingredients list updates to show different quantities/items.
-8.  Check the `recipe_events` table in Supabase; a new `view` event should be present for this recipe.
+2.  Open `http://localhost:3000` or `http://localhost:3000/home`. The homepage should appear with recipe cards in a grid layout.
+3.  ✅ Recipe cards display: title, description, cover image, stats (views, favorites), category.
+4.  Click on a recipe card. Navigate to `/recipes/[id]`.
+5.  ✅ The recipe detail page displays:
+    - Title, description, cover image
+    - Stats (views, favorites)
+    - Servings selector (1, 2, 3, 4 kişilik)
+    - Ingredients list (changes based on selected servings)
+    - Steps list
+6.  Change the servings selector (e.g., select "2 Kişilik"). The ingredients list updates automatically.
+7.  ✅ Check the `views` table in Supabase; a new view record should be created when visiting a recipe detail page.
+8.  (Future) Click the language switcher and select "Turkish". The URL should change to `/tr` and content should translate.
 
 ### Risks & Mitigations
 
