@@ -143,11 +143,10 @@ erDiagram
     
     RECIPES {
         serial id PK
-        uuid owner_user_id FK
+        uuid user_id FK
         enum status
         boolean is_free
         text cover_image_url
-        int category_id FK
     }
     
     RECIPE_TRANSLATIONS {
@@ -162,6 +161,7 @@ erDiagram
         serial id PK
         int recipe_id FK
         int servings
+        text variant_image_url
     }
     
     RECIPE_VARIANT_INGREDIENTS {
@@ -238,12 +238,13 @@ flowchart TB
     end
     
     subgraph RecipeComponents["Recipe Components"]
-        RecipeCard["RecipeCard.tsx"]
-        RecipeDetailComp["RecipeDetail.tsx"]
-        RecipeForm["RecipeForm.tsx"]
-        ServingsStepper["ServingsStepper.tsx"]
-        IngredientsList["IngredientsList.tsx"]
-        StepsList["StepsList.tsx"]
+        RecipeCard["RecipeCard.tsx ✅"]
+        RecipeList["RecipeList.tsx ✅"]
+        RecipeDetailComp["RecipeDetail.tsx ✅"]
+        RecipeForm["RecipeForm.tsx 🔄"]
+        ServingsStepper["Integrated in RecipeDetail ✅"]
+        IngredientsList["Integrated in RecipeDetail ✅"]
+        StepsList["Integrated in RecipeDetail ✅"]
     end
     
     subgraph UserComponents["User Components"]
@@ -262,12 +263,9 @@ flowchart TB
     Providers --> Pages
     Providers --> Footer
     
-    Home --> RecipeCard
+    Home --> RecipeList
     RecipeList --> RecipeCard
     RecipeDetail --> RecipeDetailComp
-    RecipeDetail --> ServingsStepper
-    RecipeDetail --> IngredientsList
-    RecipeDetail --> StepsList
     RecipeDetail --> UserActions
     RecipeDetail --> Comments
     
@@ -300,9 +298,9 @@ flowchart TB
     end
     
     subgraph Views["SQL Views"]
-        V1["v_public_recipe_cards"]
-        V2["v_recipe_detail"]
-        V3["v_variant_ingredients"]
+        V1["v_recipe_stats"]
+        V2["v_public_recipe_cards"]
+        V3["v_recipe_detail"]
         V4["v_admin_pending_recipes"]
         V5["v_user_library"]
     end
@@ -329,9 +327,9 @@ flowchart TB
 ```mermaid
 flowchart TB
     subgraph PublicRoutes["🌐 Public Routes"]
-        R1["/ (Home)"]
-        R2["/recipes (List)"]
-        R3["/recipes/[id] (Detail)"]
+        R1["/ (Home) ✅"]
+        R2["/home (Home) ✅"]
+        R3["/recipes/[id] (Detail) ✅"]
     end
     
     subgraph AuthRoutes["🔐 Auth Routes"]
@@ -380,13 +378,15 @@ flowchart TB
 
 ### SQL Views Summary
 
-| View | Purpose | Used By |
-|------|---------|---------|
-| `v_public_recipe_cards` | Public recipe listings with translations & stats | Home, Recipe List |
-| `v_recipe_detail` | Complete recipe data with all translations | Recipe Detail Page |
-| `v_variant_ingredients` | Serving-specific ingredient lists | Serving Stepper |
-| `v_admin_pending_recipes` | Pending recipes for moderation | Admin Dashboard |
-| `v_user_library` | User's favorited/saved/tried recipes | User Library Pages |
+| View | Purpose | Used By | Status |
+|------|---------|---------|:------:|
+| `v_recipe_stats` | Aggregated statistics (view_count, favorite_count, etc.) | Stats display | ✅ |
+| `v_public_recipe_cards` | Public recipe listings with translations & stats | Home, Recipe List | ✅ |
+| `v_recipe_detail` | **Complete recipe data in ONE query** - includes all variants (1,2,3,4 servings) with ingredients (TR/EN), steps (TR/EN), translations, stats | Recipe Detail Page | ✅ |
+| `v_admin_pending_recipes` | Pending recipes for moderation | Admin Dashboard | 🔄 |
+| `v_user_library` | User's favorited/saved/tried recipes | User Library Pages | 🔄 |
+
+**Note:** `v_recipe_detail` returns all variant ingredients in a single query, eliminating the need for separate `v_variant_ingredients` view.
 
 ### RLS (Row Level Security) Strategy
 
@@ -402,11 +402,11 @@ flowchart TB
 
 This project was developed across 3 structured sessions:
 
-| Session | Title | Description | Status | Playlist Link |
-|:-------:|-------|-------------|:------:|---------------|
-| **1** | 🏗️ Foundation | Database schema, Next.js setup, i18n infrastructure, public pages (Home, Recipe List, Recipe Detail), minimal UI design | ✅ Complete | [Session 1 Playlist](#) |
-| **2** | 🔐 Auth & User Features | Supabase authentication, onboarding flow, favorite/save/tried features, comment system, user profile and library pages | 🔄 Planned | [Session 2 Playlist](#) |
-| **3** | 👑 Admin & UGC | Recipe submission form, admin dashboard, moderation system, UI/UX improvements | 📋 Planned | [Session 3 Playlist](#) |
+| Session | Title | Description | Status | Progress |
+|:-------:|-------|-------------|:------:|:--------:|
+| **1** | 🏗️ Foundation | Database schema, Next.js setup, public pages (Home, Recipe List, Recipe Detail), minimal UI design | ✅ Complete | 90% - Core features done, i18n pending |
+| **2** | 🔐 Auth & User Features | Supabase authentication, onboarding flow, favorite/save/tried features, comment system, user profile and library pages | 🔄 Planned | 0% |
+| **3** | 👑 Admin & UGC | Recipe submission form, admin dashboard, moderation system, UI/UX improvements | 📋 Planned | 0% |
 
 ### Session 1: Foundation - Detailed
 
@@ -421,24 +421,40 @@ This project was developed across 3 structured sessions:
 
 ```
 📁 supabase/
-├── migrations/0001_init.sql      # Table definitions
-├── migrations/0002_views.sql     # SQL views
-└── seed/seed.sql                 # Test data
+├── migrations/0001_init.sql      # ✅ Complete schema (tables, functions, triggers, RLS)
+├── migrations/0002_views.sql      # ✅ SQL views (v_recipe_detail, v_public_recipe_cards, etc.)
+└── seed/seed.sql                  # ✅ Test data (10 recipes, 20 ingredients, 6 categories)
 
 📁 src/
-├── app/layout.tsx                # Root layout
-├── app/page.tsx                  # Home page
-├── components/core/              # Header, Footer, Providers
-├── components/i18n/              # Language switcher
-├── lib/supabase/                 # Supabase clients
-└── lib/db/public.ts              # Public query functions
+├── app/
+│   ├── layout.tsx                 # ✅ Root layout
+│   ├── page.tsx                   # ✅ Home page (with RecipeList)
+│   ├── home/page.tsx              # ✅ Alternative home page
+│   └── recipes/[id]/page.tsx      # ✅ Recipe detail page
+├── components/
+│   ├── core/                      # ✅ Header, Footer, Providers, SplashScreen
+│   ├── i18n/                      # ✅ Language switcher
+│   └── recipe/
+│       ├── RecipeCard.tsx         # ✅ Recipe card component
+│       ├── RecipeList.tsx         # ✅ Recipe list component (grid layout)
+│       └── RecipeDetail.tsx       # ✅ Recipe detail component (with servings selector)
+├── lib/
+│   ├── supabase/
+│   │   ├── browser.ts             # ✅ Client-side Supabase client (@supabase/supabase-js)
+│   │   ├── server.ts              # ✅ Server-side Supabase client
+│   │   └── middleware.ts          # ✅ Middleware client
+│   └── db/
+│       └── public.ts              # ✅ Public query functions (getAllPublicRecipes, getRecipeDetails, etc.)
 ```
 
 **Acceptance Criteria:**
 - [x] Database can be fully migrated and seeded using Supabase CLI
 - [x] App runs without errors
-- [x] Homepage displays featured recipes from `v_public_recipe_cards`
-- [x] Language switcher correctly changes locale
+- [x] Homepage displays all recipes from `v_public_recipe_cards` in grid layout
+- [x] Recipe detail page shows complete recipe data from `v_recipe_detail` (single query)
+- [x] Servings selector (1, 2, 3, 4 kişilik) dynamically updates ingredient list
+- [x] Recipe cards display title, description, image, stats, and category
+- [ ] Language switcher correctly changes locale (i18n setup pending)
 
 ### Session 2: Auth & User Features - Detailed
 
@@ -517,12 +533,13 @@ Create a `.env.local` file in the project root:
 
 ```env
 # Supabase connection details
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-local-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-local-service-role-key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-> 💡 Get Supabase URL and key by following instructions in `/supabase/README.md`
+> 💡 **For local development:** Use `http://127.0.0.1:54321` as URL and get keys from `npx supabase status`  
+> **For production:** Get URL and key from Supabase Dashboard → Settings → API  
+> See `/supabase/README.md` for detailed instructions
 
 ### 4. Start Supabase
 
@@ -560,14 +577,15 @@ recipio/
 ├── 📁 src/                       # Application source code
 │   ├── 📁 app/                   # Next.js App Router
 │   │   ├── layout.tsx            # Root layout
-│   │   ├── page.tsx              # Home page
-│   │   ├── home/                 # Home page components
+│   │   ├── page.tsx              # Home page (with RecipeList)
+│   │   ├── home/                 # Alternative home page
+│   │   ├── recipes/[id]/         # Recipe detail page
 │   │   └── splash/               # Splash screen
 │   │
 │   ├── 📁 components/            # React components
-│   │   ├── core/                 # Header, Footer, Providers
+│   │   ├── core/                 # Header, Footer, Providers, SplashScreen
 │   │   ├── i18n/                 # Language components
-│   │   ├── recipe/               # Recipe components
+│   │   ├── recipe/               # RecipeCard, RecipeList, RecipeDetail
 │   │   └── ui/                   # General UI components
 │   │
 │   ├── 📁 lib/                   # Helper libraries
