@@ -1,25 +1,106 @@
 // This file will contain functions to query public data, primarily using the SQL views.
+// Server-side only - uses next/headers
+// NOTE: Client components should import types/helpers from '@/lib/db/recipe-helpers' directly
 
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
+import type { RecipeDetail } from './recipe-helpers';
 
-export async function getFeaturedRecipes() {
+export interface PublicRecipeCard {
+    recipe_id: number;
+    status: string;
+    is_free: boolean;
+    user_id: string | null;
+    cover_image_url: string | null;
+    created_at: string;
+    title: string;
+    description: string | null;
+    category_slug: string | null;
+    view_count: number;
+    favorite_count: number;
+    save_count: number;
+    tried_count: number;
+    comment_count: number;
+}
+
+export interface RecipeFilters {
+    category?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+}
+
+export async function getAllPublicRecipes(filters?: RecipeFilters): Promise<PublicRecipeCard[]> {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
-    // In a real implementation, this would query the v_public_recipe_cards view
-    // For now, returning a dummy array
-    console.log("Fetching featured recipes...");
-    // const { data, error } = await supabase.from('v_public_recipe_cards').select('*').limit(6);
-    // if (error) {
-    //     console.error('Error fetching featured recipes:', error);
-    //     return [];
-    // }
-    // return data;
+    let query = supabase
+        .from('v_public_recipe_cards')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    // Placeholder data:
-    return [
-        { recipe_id: 1, title_en: 'Classic Lentil Soup', title_tr: 'Klasik Mercimek Çorbası', cover_image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Lentil_soup_%28mercimek_%C3%A7orbas%C4%B1%29.jpg/1024px-Lentil_soup_%28mercimek_%C3%A7orbas%C4%B1%29.jpg' },
-        { recipe_id: 2, title_en: 'Fudgy Chocolate Brownies', title_tr: 'Islak Çikolatalı Brownie', cover_image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Fudge_Brownie.jpg/1024px-Fudge_Brownie.jpg' },
-    ];
+    if (filters?.category) {
+        query = query.eq('category_slug', filters.category);
+    }
+
+    if (filters?.search) {
+        query = query.ilike('title', `%${filters.search}%`);
+    }
+
+    if (filters?.limit) {
+        query = query.limit(filters.limit);
+    }
+
+    if (filters?.offset) {
+        query = query.range(filters.offset, filters.offset + (filters.limit || 20) - 1);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error fetching public recipes:', error);
+        return [];
+    }
+
+    return data || [];
+}
+
+export async function getFeaturedRecipes(limit: number = 6): Promise<PublicRecipeCard[]> {
+    return getAllPublicRecipes({ limit });
+}
+
+export async function getCategories(locale: string = 'en') {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data, error } = await supabase
+        .from('category_translations')
+        .select('*, categories:category_id(slug, image_url)')
+        .eq('locale', locale)
+        .order('name');
+
+    if (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+    }
+
+    return data || [];
+}
+
+export async function getRecipeDetail(recipeId: number): Promise<RecipeDetail | null> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data, error } = await supabase
+        .from('v_recipe_detail')
+        .select('*')
+        .eq('recipe_id', recipeId)
+        .single();
+
+    if (error) {
+        console.error('Error fetching recipe detail:', error);
+        return null;
+    }
+
+    return data as RecipeDetail;
 }
