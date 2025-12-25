@@ -1,63 +1,44 @@
-'use client';
+import { getFeaturedRecipes, getCategories } from '@/lib/db/public';
+import { Header } from '@/components/core/Header';
+import { Footer } from '@/components/core/Footer';
+import { Providers } from '@/components/core/Providers';
+import { HomeHero } from '@/components/home/HomeHero';
+import { CategorySection } from '@/components/home/CategorySection';
+import { FeaturedRecipesSection } from '@/components/home/FeaturedRecipesSection';
+import { SplashWrapper } from '@/components/home/SplashWrapper';
+import { getLocale } from 'next-intl/server';
 
-import { useEffect, useState } from 'react';
-import { SplashScreen } from '@/components/core/SplashScreen';
+export default async function HomePage() {
+    const locale = await getLocale();
+    
+    let featuredRecipes = [];
+    let categories = [];
+    
+    try {
+        featuredRecipes = await getFeaturedRecipes(6, locale);
+    } catch (error) {
+        console.error('Error fetching featured recipes:', error);
+    }
+    
+    try {
+        categories = await getCategories(locale);
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+    }
 
-export default function HomePage() {
-  const [showSplash, setShowSplash] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
-  // Client-side render bekle
-  if (!isClient) {
     return (
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: '#ffffff',
-        }}
-      />
+        <SplashWrapper>
+            <Providers>
+                <div className="min-h-screen flex flex-col">
+                    <Header />
+                    <main className="flex-1">
+                        <HomeHero />
+                        <CategorySection categories={categories} locale={locale} />
+                        <FeaturedRecipesSection initialRecipes={featuredRecipes} locale={locale} />
+                    </main>
+                    <Footer />
+                </div>
+            </Providers>
+        </SplashWrapper>
     );
-  }
-
-  // Splash göster
-  if (showSplash) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
-  }
-
-  // Home içeriği
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#ffffff',
-        padding: '1rem',
-      }}
-    >
-      <h1
-        style={{
-          fontSize: 'clamp(1.5rem, 5vw, 3.5rem)',
-          fontWeight: 'bold',
-          color: '#000000',
-          textAlign: 'center',
-        }}
-      >
-        Create Web Site — Session I via W-OSS
-      </h1>
-    </div>
-  );
 }
