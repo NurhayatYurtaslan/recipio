@@ -6,6 +6,28 @@
     "profile": "Profile"
   },
   "HomePage": {
-    "featuredRecipes": "Featured Recipes"
+    "featuredRecipes": "Featured Recipes",
+    "heroTitle": "Discover Amazing Recipes",
+    "heroDescription": "Find your next favorite recipe from our curated collection",
+    "searchPlaceholder": "Search recipes...",
+    "search": "Search",
+    "browseByCategory": "Browse by Category",
+    "noRecipesFound": "No recipes found."
+  },
+  "RecipeDetail": {
+    "backToRecipes": "Back to recipes",
+    "instructions": "Instructions",
+    "progress": "Progress",
+    "allStepsCompleted": "All steps completed!",
+    "noSteps": "No instructions available",
+    "tips": "Chef's Tips",
+    "ingredients": "Ingredients",
+    "servings": "Servings",
+    "portionLabel": "{count, plural, one {# person} other {# people}}",
+    "noIngredients": "No ingredients listed",
+    "favorite": "Favorite",
+    "save": "Save",
+    "share": "Share",
+    "publishedOn": "Published on"
   }
 }

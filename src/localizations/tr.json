@@ -6,6 +6,28 @@
     "profile": "Profil"
   },
   "HomePage": {
-    "featuredRecipes": "Öne Çıkan Tarifler"
+    "featuredRecipes": "Öne Çıkan Tarifler",
+    "heroTitle": "Harika Tarifler Keşfedin",
+    "heroDescription": "Seçkin koleksiyonumuzdan bir sonraki favori tarifinizi bulun",
+    "searchPlaceholder": "Tarif ara...",
+    "search": "Ara",
+    "browseByCategory": "Kategoriye Göre Gözat",
+    "noRecipesFound": "Tarif bulunamadı."
+  },
+  "RecipeDetail": {
+    "backToRecipes": "Tariflere dön",
+    "instructions": "Yapılışı",
+    "progress": "İlerleme",
+    "allStepsCompleted": "Tüm adımlar tamamlandı!",
+    "noSteps": "Talimat bulunamadı",
+    "tips": "Şefin Önerileri",
+    "ingredients": "Malzemeler",
+    "servings": "Porsiyon",
+    "portionLabel": "{count, plural, one {# kişilik} other {# kişilik}}",
+    "noIngredients": "Malzeme listesi yok",
+    "favorite": "Favorile",
+    "save": "Kaydet",
+    "share": "Paylaş",
+    "publishedOn": "Yayınlanma tarihi:"
   }
 }
