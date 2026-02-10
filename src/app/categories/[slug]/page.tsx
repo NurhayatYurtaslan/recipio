@@ -5,13 +5,23 @@ import { Footer } from '@/components/core/Footer';
 import { Providers } from '@/components/core/Providers';
 import { CategoryHeader } from '@/components/category/CategoryHeader';
 import { RecipeList } from '@/components/recipe/RecipeList';
-import { getCategoryBySlug, getAllPublicRecipes } from '@/lib/db/public';
+import { getCategoryBySlug, getAllPublicRecipes, getCategories } from '@/lib/db/public';
 import type { Metadata } from 'next';
 
 interface CategoryPageProps {
     params: {
         slug: string;
     };
+}
+
+export async function generateStaticParams() {
+    const categories = await getCategories('en');
+    const slugs = [...new Set(
+        (categories as { categories?: { slug?: string } }[])
+            .map((c) => c.categories?.slug)
+            .filter((s): s is string => Boolean(s))
+    )];
+    return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {

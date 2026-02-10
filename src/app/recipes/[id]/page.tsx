@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getRecipeDetail } from '@/lib/db/public';
+import { getRecipeDetail, getAllPublicRecipes } from '@/lib/db/public';
 import { getLocalizedRecipeData } from '@/lib/db/recipe-helpers';
 import { Header } from '@/components/core/Header';
 import { Footer } from '@/components/core/Footer';
@@ -10,6 +10,11 @@ import type { Metadata } from 'next';
 
 interface RecipePageProps {
     params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+    const recipes = await getAllPublicRecipes({ limit: 500 });
+    return recipes.map((r) => ({ id: String(r.recipe_id) }));
 }
 
 export async function generateMetadata({ params }: RecipePageProps): Promise<Metadata> {
