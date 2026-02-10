@@ -9,6 +9,7 @@
   },
   "HomePage": {
     "featuredRecipes": "Öne Çıkan Tarifler",
+    "heroBadge": "Tarif Koleksiyonu",
     "heroTitle": "Harika Tarifler Keşfedin",
     "heroDescription": "Seçkin koleksiyonumuzdan bir sonraki favori tarifinizi bulun",
     "searchPlaceholder": "Tarif ara...",

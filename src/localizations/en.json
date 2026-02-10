@@ -9,6 +9,7 @@
   },
   "HomePage": {
     "featuredRecipes": "Featured Recipes",
+    "heroBadge": "Recipe Collection",
     "heroTitle": "Discover Amazing Recipes",
     "heroDescription": "Find your next favorite recipe from our curated collection",
     "searchPlaceholder": "Search recipes...",

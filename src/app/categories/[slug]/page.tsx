@@ -5,7 +5,7 @@ import { Footer } from '@/components/core/Footer';
 import { Providers } from '@/components/core/Providers';
 import { CategoryHeader } from '@/components/category/CategoryHeader';
 import { RecipeList } from '@/components/recipe/RecipeList';
-import { getCategoryBySlug, getAllPublicRecipes, getCategories } from '@/lib/db/public';
+import { getCategoryBySlug, getAllPublicRecipes, getCategorySlugsForBuild } from '@/lib/db/public';
 import type { Metadata } from 'next';
 
 interface CategoryPageProps {
@@ -15,11 +15,7 @@ interface CategoryPageProps {
 }
 
 export async function generateStaticParams() {
-    const categories = await getCategories('en');
-    const slugList = (categories as { categories?: { slug?: string } }[])
-        .map((c) => c.categories?.slug)
-        .filter((s): s is string => Boolean(s));
-    const slugs = Array.from(new Set(slugList));
+    const slugs = await getCategorySlugsForBuild();
     return slugs.map((slug) => ({ slug }));
 }
 
