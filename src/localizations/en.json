@@ -3,7 +3,9 @@
     "search": "Search...",
     "recipes": "Recipes",
     "login": "Login",
-    "profile": "Profile"
+    "signUp": "Sign Up",
+    "profile": "Profile",
+    "logout": "Logout"
   },
   "HomePage": {
     "featuredRecipes": "Featured Recipes",

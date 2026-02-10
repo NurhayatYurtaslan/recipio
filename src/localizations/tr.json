@@ -3,7 +3,9 @@
     "search": "Ara...",
     "recipes": "Tarifler",
     "login": "Giriş Yap",
-    "profile": "Profil"
+    "signUp": "Kayıt Ol",
+    "profile": "Profil",
+    "logout": "Çıkış Yap"
   },
   "HomePage": {
     "featuredRecipes": "Öne Çıkan Tarifler",

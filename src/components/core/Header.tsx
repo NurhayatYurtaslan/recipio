@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ChefHat, Search, User, LogOut } from 'lucide-react';
+import { ChefHat, Search, User as UserIcon, LogOut } from 'lucide-react';
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -95,26 +95,39 @@ export function Header() {
                             <>
                                 <Link href="/home">
                                     <Button variant="ghost" size="sm" className="gap-1.5">
-                                        <User className="h-4 w-4" />
+                                        <UserIcon className="h-4 w-4" />
                                         <span className="hidden sm:inline max-w-[120px] truncate" title={displayName}>
                                             {displayName}
                                         </span>
                                     </Button>
                                 </Link>
-                                <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1.5">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={handleLogout} 
+                                    className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 hover:border-destructive hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                                >
                                     <LogOut className="h-4 w-4" />
-                                    <span className="hidden sm:inline">{t('logout')}</span>
+                                    <span className="hidden sm:inline font-medium">{t('logout')}</span>
                                 </Button>
                             </>
                         ) : (
                             <>
                                 <Link href="/login">
-                                    <Button variant="ghost" size="sm">
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        className="hover:bg-accent/50 transition-all duration-200"
+                                    >
                                         {t('login')}
                                     </Button>
                                 </Link>
                                 <Link href="/signup">
-                                    <Button variant="default" size="sm">
+                                    <Button 
+                                        variant="default" 
+                                        size="sm"
+                                        className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                                    >
                                         {t('signUp')}
                                     </Button>
                                 </Link>
