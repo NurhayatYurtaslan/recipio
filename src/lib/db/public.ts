@@ -28,6 +28,11 @@ export interface PublicRecipeCard {
     created_at: string;
     title: string;
     description: string | null;
+    /** From v_public_recipe_cards when selecting * */
+    title_en?: string | null;
+    title_tr?: string | null;
+    description_en?: string | null;
+    description_tr?: string | null;
     category_slug: string | null;
     view_count: number;
     favorite_count: number;

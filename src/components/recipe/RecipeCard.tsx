@@ -22,8 +22,24 @@ function ImageFallback() {
     );
 }
 
-export function RecipeCard({ recipe, locale = 'en' }: RecipeCardProps) {
+/** Resolve title/description by locale (default site locale: tr). */
+function getLocalizedCardText(
+    recipe: PublicRecipeCard,
+    locale: string
+): { title: string; description: string | null } {
+    const isTr = locale === 'tr';
+    const title =
+        (isTr ? recipe.title_tr ?? recipe.title_en : recipe.title_en ?? recipe.title_tr) ??
+        recipe.title;
+    const description =
+        (isTr ? recipe.description_tr ?? recipe.description_en : recipe.description_en ?? recipe.description_tr) ??
+        recipe.description;
+    return { title, description };
+}
+
+export function RecipeCard({ recipe, locale = 'tr' }: RecipeCardProps) {
     const [imageError, setImageError] = useState(false);
+    const { title, description } = getLocalizedCardText(recipe, locale);
 
     return (
         <Link href={`/recipes/${recipe.recipe_id}`}>
@@ -32,7 +48,7 @@ export function RecipeCard({ recipe, locale = 'en' }: RecipeCardProps) {
                     {recipe.cover_image_url && !imageError ? (
                         <Image
                             src={recipe.cover_image_url}
-                            alt={recipe.title}
+                            alt={title}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -51,11 +67,11 @@ export function RecipeCard({ recipe, locale = 'en' }: RecipeCardProps) {
                 </div>
                 <CardContent className="flex-1 p-4">
                     <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                        {recipe.title}
+                        {title}
                     </h3>
-                    {recipe.description && (
+                    {description && (
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                            {recipe.description}
+                            {description}
                         </p>
                     )}
                 </CardContent>

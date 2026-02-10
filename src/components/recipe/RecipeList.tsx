@@ -14,7 +14,7 @@ interface RecipeListProps {
     locale?: string;
 }
 
-export function RecipeList({ initialRecipes = [], category, search, locale = 'en' }: RecipeListProps) {
+export function RecipeList({ initialRecipes = [], category, search, locale = 'tr' }: RecipeListProps) {
     const t = useTranslations('HomePage');
     const tCategory = useTranslations('CategoryPage');
     const [recipes, setRecipes] = useState<PublicRecipeCard[]>(initialRecipes);
