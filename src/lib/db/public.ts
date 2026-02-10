@@ -44,7 +44,8 @@ export async function getAllPublicRecipes(filters?: RecipeFilters): Promise<Publ
     }
 
     if (filters?.search) {
-        query = query.ilike('title', `%${filters.search}%`);
+        // Search in both English and Turkish title fields
+        query = query.or(`title_en.ilike.%${filters.search}%,title_tr.ilike.%${filters.search}%`);
     }
 
     if (filters?.limit) {
