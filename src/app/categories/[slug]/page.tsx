@@ -5,7 +5,8 @@ import { Footer } from '@/components/core/Footer';
 import { Providers } from '@/components/core/Providers';
 import { CategoryHeader } from '@/components/category/CategoryHeader';
 import { RecipeList } from '@/components/recipe/RecipeList';
-import { getCategoryBySlug, getAllPublicRecipes, getCategorySlugsForBuild } from '@/lib/db/public';
+import { getCategoryBySlug, getAllPublicRecipes } from '@/lib/db/public';
+import { getCategorySlugsForBuild } from '@/lib/db/public-build';
 import type { Metadata } from 'next';
 
 interface CategoryPageProps {

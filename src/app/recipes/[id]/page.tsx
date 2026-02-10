@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getRecipeDetail, getPublicRecipeIdsForBuild } from '@/lib/db/public';
+import { getRecipeDetail } from '@/lib/db/public';
+import { getPublicRecipeIdsForBuild } from '@/lib/db/public-build';
 import { getLocalizedRecipeData } from '@/lib/db/recipe-helpers';
 import { Header } from '@/components/core/Header';
 import { Footer } from '@/components/core/Footer';

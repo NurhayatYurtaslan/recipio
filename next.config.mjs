@@ -7,7 +7,8 @@ const basePath = process.env.GITHUB_ACTIONS ? `/${repoSlug}` : '';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Static export only in CI (GitHub Actions); local dev runs without it so middleware works
+  ...(process.env.GITHUB_ACTIONS && { output: 'export' }),
   basePath,
   assetPrefix: basePath ? `${basePath}/` : undefined,
   env: {
