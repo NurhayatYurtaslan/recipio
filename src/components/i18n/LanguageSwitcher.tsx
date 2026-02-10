@@ -1,18 +1,19 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Languages } from 'lucide-react';
 
 export default function LanguageSwitcher() {
+    const router = useRouter();
     const pathname = usePathname();
     const locale = useLocale();
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const nextLocale = e.target.value as 'tr' | 'en';
-        document.cookie = `NEXT_LOCALE=${nextLocale};path=/;max-age=31536000;SameSite=Lax`;
-        // Reload current page so the next request sends the new cookie and server renders with new locale
-        window.location.href = pathname || '/';
+        if (nextLocale === locale) return;
+        const next = pathname || '/';
+        router.push(`/locale-switching?locale=${nextLocale}&next=${encodeURIComponent(next)}`);
     };
 
     return (
