@@ -11,11 +11,11 @@ import { getLocale } from 'next-intl/server';
 export default async function HomePage() {
     const locale = await getLocale();
     
-    let featuredRecipes = [];
-    let categories = [];
+    let featuredRecipes: any[] = [];
+    let categories: any[] = [];
     
     try {
-        featuredRecipes = await getFeaturedRecipes(6, locale);
+        featuredRecipes = await getFeaturedRecipes(6);
     } catch (error) {
         console.error('Error fetching featured recipes:', error);
     }
