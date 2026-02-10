@@ -51,7 +51,7 @@ export function CategoryCard({ category, variant = 'default' }: CategoryCardProp
                         <div className={`w-full h-full flex flex-col items-center justify-center ${variant === 'default' ? 'bg-muted/50' : 'bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 dark:from-emerald-900 dark:via-teal-900 dark:to-cyan-900'}`}>
                             <ChefHat className={`${variant === 'large' ? 'h-16 w-16' : variant === 'default' ? 'h-8 w-8' : 'h-12 w-12'} mb-2 ${variant === 'default' ? 'text-muted-foreground' : 'text-emerald-500 dark:text-emerald-400'} transition-transform duration-300 ${isHovered && variant !== 'default' ? 'scale-110 rotate-12' : ''}`} />
                             {variant !== 'default' && (
-                                <span className={`${variant === 'large' ? 'text-lg' : 'text-sm'} font-semibold ${variant === 'default' ? 'text-foreground' : 'text-emerald-700 dark:text-emerald-300'}`}>
+                                <span className={`${variant === 'large' ? 'text-lg' : 'text-sm'} font-semibold text-emerald-700 dark:text-emerald-300`}>
                                     {category.name}
                                 </span>
                             )}
