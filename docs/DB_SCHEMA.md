@@ -158,6 +158,7 @@ Views simplify application queries and ensure RLS is respected. All views are gr
 - **Returns:** `recipe_id`, `status`, `user_id`, `cover_image_url`, `created_at`, `title_en`, `title_tr`, `author_name`, `translation_count`, `step_count`, `variant_count`
 - **Filter:** Only `status = 'pending'` recipes
 - **Access:** `authenticated` role only
+- **Security:** `security_invoker = true` — view runs with caller’s privileges; RLS on underlying tables ensures only admins see pending recipes. Avoids definer-view issues for new signups.
 
 ### **`v_user_library`**
 - **Purpose:** User's personal library (favorites, saved, tried)
