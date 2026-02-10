@@ -16,11 +16,10 @@ interface CategoryPageProps {
 
 export async function generateStaticParams() {
     const categories = await getCategories('en');
-    const slugs = [...new Set(
-        (categories as { categories?: { slug?: string } }[])
-            .map((c) => c.categories?.slug)
-            .filter((s): s is string => Boolean(s))
-    )];
+    const slugList = (categories as { categories?: { slug?: string } }[])
+        .map((c) => c.categories?.slug)
+        .filter((s): s is string => Boolean(s));
+    const slugs = Array.from(new Set(slugList));
     return slugs.map((slug) => ({ slug }));
 }
 

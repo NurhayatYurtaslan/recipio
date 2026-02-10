@@ -103,12 +103,9 @@ export default function SignUpPage() {
       fetch('http://127.0.0.1:7243/ingest/72ae24f2-6fe3-4c22-a4bc-f149b3860c8b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:87',message:'Before signUp call',data:{hasMetadata:Object.keys(metadata).length>0,windowOrigin:typeof window !== 'undefined' ? window.location.origin : 'undefined'},timestamp:Date.now(),runId:'run2',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
 
-      // Redirect after email confirmation: Supabase Dashboard'da "Confirm email" açıksa
-      // bu URL'deki linke tıklanınca session oluşur (callback route).
-      const redirectUrl =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}/api/auth/callback`
-          : undefined
+      // Redirect after email confirmation. Static deploy (e.g. GitHub Pages) uses client /auth/callback.
+      const base = typeof window !== 'undefined' ? window.location.origin + (process.env.NEXT_PUBLIC_BASE_PATH || '') : ''
+      const redirectUrl = base ? `${base}/auth/callback` : undefined
 
       const signUpOptions: any = {
         data: metadata,
