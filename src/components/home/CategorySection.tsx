@@ -68,7 +68,7 @@ export function CategorySection({ categories, locale }: CategorySectionProps) {
                 {categories.map((category) => (
                     <Link
                         key={category.category_id}
-                        href={`/recipes?category=${category.categories.slug}`}
+                        href={`/categories/${category.categories.slug}`}
                     >
                         <CategoryCard category={category} />
                     </Link>

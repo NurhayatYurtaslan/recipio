@@ -29,5 +29,38 @@
     "save": "Save",
     "share": "Share",
     "publishedOn": "Published on"
+  },
+  "Auth": {
+    "login": "Login",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "displayName": "Display Name",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginError": "Login failed",
+    "signUpError": "Sign up failed",
+    "invalidCredentials": "Invalid email or password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "termsAccept": "I accept the terms and conditions",
+    "signingIn": "Signing in...",
+    "signingUp": "Signing up...",
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create account",
+    "loginToAccount": "Login to your account",
+    "emailConfirmationRequired": "Please check your email to confirm your account before signing in.",
+    "signUpSuccess": "Sign up successful! Please check your email."
+  },
+  "CategoryPage": {
+    "title": "{categoryName} Recipes",
+    "noRecipes": "No recipes found in this category yet.",
+    "backToCategories": "Back to Categories",
+    "backToHome": "Back to Home",
+    "recipesInCategory": "{count} recipes found",
+    "categoryNotFound": "Category not found"
   }
 }

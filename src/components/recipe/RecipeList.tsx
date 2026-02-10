@@ -16,6 +16,7 @@ interface RecipeListProps {
 
 export function RecipeList({ initialRecipes = [], category, search, locale = 'en' }: RecipeListProps) {
     const t = useTranslations('HomePage');
+    const tCategory = useTranslations('CategoryPage');
     const [recipes, setRecipes] = useState<PublicRecipeCard[]>(initialRecipes);
     const [loading, setLoading] = useState(!initialRecipes.length);
     const [error, setError] = useState<string | null>(null);
@@ -87,7 +88,9 @@ export function RecipeList({ initialRecipes = [], category, search, locale = 'en
     if (recipes.length === 0) {
         return (
             <div className="text-center py-12">
-                <p className="text-muted-foreground">{t('noRecipesFound')}</p>
+                <p className="text-muted-foreground">
+                    {category ? tCategory('noRecipes') : t('noRecipesFound')}
+                </p>
             </div>
         );
     }

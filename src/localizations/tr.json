@@ -29,5 +29,38 @@
     "save": "Kaydet",
     "share": "Paylaş",
     "publishedOn": "Yayınlanma tarihi:"
+  },
+  "Auth": {
+    "login": "Giriş Yap",
+    "signUp": "Kayıt Ol",
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifreyi Onayla",
+    "displayName": "Görünen İsim",
+    "rememberMe": "Beni hatırla",
+    "forgotPassword": "Şifremi unuttum",
+    "noAccount": "Hesabın yok mu?",
+    "alreadyHaveAccount": "Zaten hesabın var mı?",
+    "loginError": "Giriş başarısız",
+    "signUpError": "Kayıt başarısız",
+    "invalidCredentials": "E-posta veya şifre hatalı",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordTooShort": "Şifre en az 6 karakter olmalı",
+    "termsAccept": "Şartları kabul ediyorum",
+    "signingIn": "Giriş yapılıyor...",
+    "signingUp": "Kayıt olunuyor...",
+    "welcomeBack": "Tekrar hoş geldiniz",
+    "createAccount": "Hesap oluştur",
+    "loginToAccount": "Hesabınıza giriş yapın",
+    "emailConfirmationRequired": "Lütfen hesabınızı doğrulamak için e-postanızı kontrol edin.",
+    "signUpSuccess": "Kayıt başarılı! E-postanızı kontrol edin."
+  },
+  "CategoryPage": {
+    "title": "{categoryName} Tarifleri",
+    "noRecipes": "Bu kategoride henüz tarif bulunmamaktadır.",
+    "backToCategories": "Kategorilere Dön",
+    "backToHome": "Ana Sayfaya Dön",
+    "recipesInCategory": "{count} tarif bulundu",
+    "categoryNotFound": "Kategori bulunamadı"
   }
 }

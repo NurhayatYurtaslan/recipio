@@ -3,6 +3,8 @@
 -- RLS: Trigger'ın yazabilmesi için service_role; kullanıcının kendi kaydı için auth.uid() kabul.
 
 -- Trigger: yeni kullanıcı = profile + user rolü
+-- SECURITY: Bu trigger her zaman 'user' rolü atar. Metadata'dan role bilgisi okunmaz.
+-- Admin rolü sadece manuel olarak veritabanı güncellemesi ile atanabilir.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -21,6 +23,8 @@ BEGIN
         new.raw_user_meta_data->>'avatar_url'
     );
 
+    -- Her zaman 'user' rolü atanır. Metadata'dan role bilgisi okunmaz.
+    -- Admin rolü sadece manuel veritabanı güncellemesi ile atanabilir.
     INSERT INTO public.user_roles (user_id, role)
     VALUES (new.id, 'user');
 
@@ -32,8 +36,13 @@ DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
 CREATE POLICY "Users can insert their own profile." ON public.profiles
     FOR INSERT WITH CHECK (auth.uid() = id OR auth.role() = 'service_role');
 
+-- RLS Policy: Kullanıcılar sadece kendi hesapları için 'user' rolü ekleyebilir.
+-- Admin rolü sadece service_role (veritabanı yöneticisi) tarafından atanabilir.
 DROP POLICY IF EXISTS "Service or user can insert default user role." ON public.user_roles;
 CREATE POLICY "Service or user can insert default user role." ON public.user_roles
     FOR INSERT WITH CHECK (
-        (auth.uid() = user_id AND role = 'user') OR auth.role() = 'service_role'
+        -- Kullanıcılar sadece kendi hesapları için 'user' rolü ekleyebilir
+        (auth.uid() = user_id AND role = 'user') 
+        -- Admin rolü sadece service_role tarafından atanabilir
+        OR auth.role() = 'service_role'
     );

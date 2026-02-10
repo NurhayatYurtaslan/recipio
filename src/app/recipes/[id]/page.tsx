@@ -47,7 +47,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
     return (
         <Providers>
-            <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+            <div className="min-h-screen flex flex-col">
                 <Header />
                 <main className="flex-1">
                     <RecipeDetailView recipe={recipe} locale={locale} />

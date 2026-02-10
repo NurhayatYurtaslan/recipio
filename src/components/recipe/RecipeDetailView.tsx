@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { RecipeDetail } from '@/lib/db/recipe-helpers';
 import { getLocalizedRecipeData, getIngredientsForServings } from '@/lib/db/recipe-helpers';
 
@@ -38,9 +37,15 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
     const [selectedServings, setSelectedServings] = useState(availableServings[0] || 1);
     const [imageError, setImageError] = useState(false);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+    const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
 
     const ingredients = getIngredientsForServings(recipe, selectedServings, locale);
     const steps = localized.steps || [];
+
+    // Reset checked ingredients when servings change
+    useEffect(() => {
+        setCheckedIngredients(new Set());
+    }, [selectedServings]);
 
     const toggleStep = (stepNumber: number) => {
         setCompletedSteps(prev => 
@@ -48,6 +53,18 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
                 ? prev.filter(s => s !== stepNumber)
                 : [...prev, stepNumber]
         );
+    };
+
+    const toggleIngredient = (index: number) => {
+        setCheckedIngredients(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
     };
 
     const formatDate = (dateString: string) => {
@@ -59,278 +76,297 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
     };
 
     return (
-        <div className="min-h-screen">
-            {/* Hero Section */}
-            <section className="relative h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden">
-                <div className="absolute inset-0">
-                    {recipe.cover_image_url && !imageError ? (
-                        <Image
-                            src={recipe.cover_image_url}
-                            alt={localized.title || 'Recipe'}
-                            fill
-                            className="object-cover"
-                            priority
-                            onError={() => setImageError(true)}
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 flex items-center justify-center">
-                            <UtensilsCrossed className="h-32 w-32 text-white/30" />
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                </div>
+        <div className="min-h-screen bg-background">
+            {/* Header Section - Simplified */}
+            <div className="border-b bg-card">
+                <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
+                    {/* Back Button */}
+                    <Link 
+                        href="/"
+                        className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors text-sm"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span>{t('backToRecipes')}</span>
+                    </Link>
 
-                {/* Content Overlay */}
-                <div className="relative z-10 h-full flex flex-col justify-end px-4 sm:px-6 lg:px-8 pb-8">
-                    <div className="container mx-auto max-w-6xl">
-                        {/* Back Button */}
-                        <Link 
-                            href="/"
-                            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors text-sm"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            <span>{t('backToRecipes')}</span>
-                        </Link>
-
-                        {/* Category Badge */}
+                    {/* Title and Category */}
+                    <div className="space-y-3">
                         {localized.categoryName && (
-                            <div className="mb-3">
-                                <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 px-3 py-1">
-                                    {localized.categoryName}
-                                </Badge>
-                            </div>
+                            <Badge variant="secondary" className="text-xs">
+                                {localized.categoryName}
+                            </Badge>
                         )}
-
-                        {/* Title */}
-                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg max-w-3xl leading-tight">
+                        <h1 className="text-3xl md:text-4xl font-bold leading-tight">
                             {localized.title}
                         </h1>
-
-                        {/* Stats Row */}
-                        <div className="flex flex-wrap items-center gap-4 text-white/90 text-sm">
-                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                        
+                        {/* Simple Stats */}
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1.5">
                                 <Eye className="h-4 w-4" />
                                 <span>{recipe.view_count}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                            <div className="flex items-center gap-1.5">
                                 <Heart className="h-4 w-4" />
                                 <span>{recipe.favorite_count}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                            <div className="flex items-center gap-1.5">
                                 <MessageCircle className="h-4 w-4" />
                                 <span>{recipe.comment_count}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+
+            {/* Recipe Image */}
+            {recipe.cover_image_url && !imageError && (
+                <div className="relative w-full h-[300px] md:h-[400px] bg-muted">
+                    <Image
+                        src={recipe.cover_image_url}
+                        alt={localized.title || 'Recipe'}
+                        fill
+                        className="object-cover"
+                        priority
+                        onError={() => setImageError(true)}
+                    />
+                </div>
+            )}
 
             {/* Main Content */}
-            <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+            <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Main Content */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Description */}
                         {localized.description && (
-                            <Card className="border-0 shadow-sm bg-white/80 dark:bg-slate-800/80 backdrop-blur">
-                                <CardContent className="pt-6">
-                                    <p className="text-lg text-muted-foreground leading-relaxed">
-                                        {localized.description}
-                                    </p>
-                                </CardContent>
-                            </Card>
+                            <div className="prose prose-slate dark:prose-invert max-w-none">
+                                <p className="text-base text-muted-foreground leading-relaxed">
+                                    {localized.description}
+                                </p>
+                            </div>
                         )}
 
                         {/* Instructions */}
-                        <Card className="border-0 shadow-md bg-white dark:bg-slate-800">
-                            <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-900/50">
-                                <CardTitle className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-primary/10">
-                                        <ListOrdered className="h-5 w-5 text-primary" />
-                                    </div>
-                                    {t('instructions')}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                {steps.length > 0 ? (
-                                    <>
-                                        <ol className="space-y-4">
-                                            {steps.map((step) => (
-                                                <li 
-                                                    key={step.step_number}
-                                                    className={`flex gap-4 p-4 rounded-xl transition-all duration-200 cursor-pointer border-2 ${
-                                                        completedSteps.includes(step.step_number)
-                                                            ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800'
-                                                            : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-200 dark:hover:border-slate-600'
-                                                    }`}
-                                                    onClick={() => toggleStep(step.step_number)}
-                                                >
-                                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${
-                                                        completedSteps.includes(step.step_number)
-                                                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                                            : 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md'
-                                                    }`}>
-                                                        {completedSteps.includes(step.step_number) ? (
-                                                            <CheckCircle2 className="h-5 w-5" />
-                                                        ) : (
-                                                            step.step_number
-                                                        )}
-                                                    </div>
-                                                    <p className={`text-base leading-relaxed pt-2 flex-1 ${
-                                                        completedSteps.includes(step.step_number)
-                                                            ? 'text-muted-foreground line-through decoration-emerald-500 decoration-2'
-                                                            : ''
-                                                    }`}>
-                                                        {step.text}
-                                                    </p>
-                                                </li>
-                                            ))}
-                                        </ol>
+                        <div className="space-y-6">
+                            <h2 className="text-2xl font-semibold flex items-center gap-2">
+                                <ListOrdered className="h-5 w-5" />
+                                {t('instructions')}
+                            </h2>
+                            
+                            {steps.length > 0 ? (
+                                <>
+                                    <ol className="space-y-4">
+                                        {steps.map((step) => (
+                                            <li 
+                                                key={step.step_number}
+                                                className={`flex gap-4 p-4 rounded-lg transition-colors cursor-pointer ${
+                                                    completedSteps.includes(step.step_number)
+                                                        ? 'bg-muted/50'
+                                                        : 'hover:bg-muted/30'
+                                                }`}
+                                                onClick={() => toggleStep(step.step_number)}
+                                            >
+                                                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                                                    completedSteps.includes(step.step_number)
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : 'bg-muted text-foreground'
+                                                }`}>
+                                                    {completedSteps.includes(step.step_number) ? (
+                                                        <CheckCircle2 className="h-4 w-4" />
+                                                    ) : (
+                                                        step.step_number
+                                                    )}
+                                                </div>
+                                                <p className={`text-base leading-relaxed flex-1 pt-1 ${
+                                                    completedSteps.includes(step.step_number)
+                                                        ? 'text-muted-foreground line-through'
+                                                        : ''
+                                                }`}>
+                                                    {step.text}
+                                                </p>
+                                            </li>
+                                        ))}
+                                    </ol>
 
-                                        {/* Progress Bar */}
-                                        <div className="mt-8 pt-6 border-t">
-                                            <div className="flex items-center justify-between text-sm mb-3">
-                                                <span className="text-muted-foreground font-medium">{t('progress')}</span>
-                                                <span className="font-bold text-primary">
+                                    {/* Simple Progress */}
+                                    {steps.length > 0 && (
+                                        <div className="pt-4 border-t">
+                                            <div className="flex items-center justify-between text-sm mb-2">
+                                                <span className="text-muted-foreground">{t('progress')}</span>
+                                                <span className="font-medium">
                                                     {completedSteps.length} / {steps.length}
                                                 </span>
                                             </div>
-                                            <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                            <div className="h-2 bg-muted rounded-full overflow-hidden">
                                                 <div 
-                                                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500 ease-out rounded-full"
+                                                    className="h-full bg-primary transition-all duration-300 rounded-full"
                                                     style={{ width: `${(completedSteps.length / steps.length) * 100}%` }}
                                                 />
                                             </div>
-                                            {completedSteps.length === steps.length && steps.length > 0 && (
-                                                <p className="text-center mt-4 text-emerald-600 dark:text-emerald-400 font-medium flex items-center justify-center gap-2">
-                                                    <CheckCircle2 className="h-5 w-5" />
+                                            {completedSteps.length === steps.length && (
+                                                <p className="text-center mt-3 text-sm text-muted-foreground flex items-center justify-center gap-2">
+                                                    <CheckCircle2 className="h-4 w-4" />
                                                     {t('allStepsCompleted')}
                                                 </p>
                                             )}
                                         </div>
-                                    </>
-                                ) : (
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        <ChefHat className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                        <p>{t('noSteps')}</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    <ChefHat className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                                    <p>{t('noSteps')}</p>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Tips */}
                         {localized.tips && (
-                            <Card className="border-0 shadow-md bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-3 text-amber-700 dark:text-amber-400">
-                                        <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50">
-                                            <Lightbulb className="h-5 w-5" />
-                                        </div>
-                                        {t('tips')}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-amber-900 dark:text-amber-100 leading-relaxed">
-                                        {localized.tips}
-                                    </p>
-                                </CardContent>
-                            </Card>
+                            <div className="p-6 rounded-lg border bg-muted/30">
+                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                    <Lightbulb className="h-5 w-5" />
+                                    {t('tips')}
+                                </h3>
+                                <p className="text-base leading-relaxed text-muted-foreground">
+                                    {localized.tips}
+                                </p>
+                            </div>
                         )}
                     </div>
 
                     {/* Right Column - Ingredients Sidebar */}
-                    <div className="space-y-6">
-                        <div className="lg:sticky lg:top-24">
-                            {/* Ingredients Card */}
-                            <Card className="border-0 shadow-lg bg-white dark:bg-slate-800 overflow-hidden">
-                                <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
-                                    <CardTitle className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-primary/10">
-                                            <ShoppingBasket className="h-5 w-5 text-primary" />
-                                        </div>
-                                        {t('ingredients')}
-                                    </CardTitle>
-                                    
-                                    {/* Servings Tab Bar */}
-                                    <div className="mt-4">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                                            <Users className="h-4 w-4" />
-                                            <span>{t('servings')}</span>
-                                        </div>
-                                        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
-                                            {availableServings.map((serving) => (
-                                                <button
-                                                    key={serving}
-                                                    onClick={() => setSelectedServings(serving)}
-                                                    className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                                                        selectedServings === serving
-                                                            ? 'bg-white dark:bg-slate-600 text-primary shadow-md'
-                                                            : 'text-muted-foreground hover:text-foreground'
-                                                    }`}
-                                                >
-                                                    {serving}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <p className="text-xs text-center text-muted-foreground mt-2">
-                                            {t('portionLabel', { count: selectedServings })}
-                                        </p>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="pt-4">
-                                    {ingredients.length > 0 ? (
-                                        <ul className="space-y-1">
-                                            {ingredients.map((ingredient, index) => (
-                                                <li 
-                                                    key={index}
-                                                    className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                                                >
-                                                    <span className="font-medium text-foreground">
-                                                        {ingredient.name}
-                                                    </span>
-                                                    <div className="text-right">
-                                                        <span className="text-sm font-semibold text-primary">
-                                                            {ingredient.amount} {ingredient.unit}
-                                                        </span>
-                                                        {ingredient.note && (
-                                                            <span className="block text-xs text-muted-foreground">
-                                                                ({ingredient.note})
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            <ShoppingBasket className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                            <p>{t('noIngredients')}</p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-
-                            {/* Action Buttons */}
-                            <div className="grid grid-cols-3 gap-3 mt-4">
-                                <Button variant="outline" className="flex-col h-auto py-3 gap-1 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400">
-                                    <Heart className="h-5 w-5" />
-                                    <span className="text-xs">{t('favorite')}</span>
-                                </Button>
-                                <Button variant="outline" className="flex-col h-auto py-3 gap-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/30 dark:hover:text-blue-400">
-                                    <Bookmark className="h-5 w-5" />
-                                    <span className="text-xs">{t('save')}</span>
-                                </Button>
-                                <Button variant="outline" className="flex-col h-auto py-3 gap-1 hover:bg-green-50 hover:text-green-600 hover:border-green-200 dark:hover:bg-green-950/30 dark:hover:text-green-400">
-                                    <Share2 className="h-5 w-5" />
-                                    <span className="text-xs">{t('share')}</span>
-                                </Button>
+                    <div className="lg:sticky lg:top-8 space-y-6">
+                        {/* Ingredients Card */}
+                        <div className="border rounded-lg bg-card p-6">
+                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <ShoppingBasket className="h-5 w-5" />
+                                {t('ingredients')}
+                            </h2>
+                            
+                            {/* Servings Selector */}
+                            <div className="mb-6">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                                    <Users className="h-4 w-4" />
+                                    <span>{t('servings')}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    {availableServings.map((serving) => (
+                                        <button
+                                            key={serving}
+                                            onClick={() => setSelectedServings(serving)}
+                                            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                                                selectedServings === serving
+                                                    ? 'bg-primary text-primary-foreground'
+                                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                            }`}
+                                        >
+                                            {serving}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-center text-muted-foreground mt-2">
+                                    {t('portionLabel', { count: selectedServings })}
+                                </p>
                             </div>
 
-                            {/* Meta Info */}
-                            <p className="text-xs text-muted-foreground text-center mt-6">
-                                {t('publishedOn')} {formatDate(recipe.created_at)}
-                            </p>
+                            {/* Ingredients List */}
+                            {ingredients.length > 0 ? (
+                                <>
+                                    <ul className="space-y-2">
+                                        {ingredients.map((ingredient, index) => {
+                                            const isChecked = checkedIngredients.has(index);
+                                            return (
+                                                <li 
+                                                    key={index}
+                                                    className={`flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer ${
+                                                        isChecked 
+                                                            ? 'bg-muted/50' 
+                                                            : 'hover:bg-muted/30'
+                                                    }`}
+                                                    onClick={() => toggleIngredient(index)}
+                                                >
+                                                    <div className="flex-shrink-0 mt-0.5">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isChecked}
+                                                            onChange={() => toggleIngredient(index)}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="w-4 h-4 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-4">
+                                                            <span className={`text-sm font-medium flex-1 ${
+                                                                isChecked 
+                                                                    ? 'text-muted-foreground line-through' 
+                                                                    : ''
+                                                            }`}>
+                                                                {ingredient.name}
+                                                                {ingredient.note && (
+                                                                    <span className="block text-xs text-muted-foreground mt-1">
+                                                                        {ingredient.note}
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                            <span className={`text-sm font-semibold text-right whitespace-nowrap ${
+                                                                isChecked ? 'text-muted-foreground' : ''
+                                                            }`}>
+                                                                {ingredient.amount} {ingredient.unit}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                    
+                                    {/* Ingredients Progress */}
+                                    {ingredients.length > 0 && (
+                                        <div className="mt-4 pt-4 border-t">
+                                            <div className="flex items-center justify-between text-xs mb-2">
+                                                <span className="text-muted-foreground">{t('ingredients')}</span>
+                                                <span className="font-medium">
+                                                    {checkedIngredients.size} / {ingredients.length}
+                                                </span>
+                                            </div>
+                                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-primary transition-all duration-300 rounded-full"
+                                                    style={{ width: `${(checkedIngredients.size / ingredients.length) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-8 text-muted-foreground">
+                                    <ShoppingBasket className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">{t('noIngredients')}</p>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-3 gap-2">
+                            <Button variant="outline" size="sm" className="flex-col h-auto py-3 gap-1">
+                                <Heart className="h-4 w-4" />
+                                <span className="text-xs">{t('favorite')}</span>
+                            </Button>
+                            <Button variant="outline" size="sm" className="flex-col h-auto py-3 gap-1">
+                                <Bookmark className="h-4 w-4" />
+                                <span className="text-xs">{t('save')}</span>
+                            </Button>
+                            <Button variant="outline" size="sm" className="flex-col h-auto py-3 gap-1">
+                                <Share2 className="h-4 w-4" />
+                                <span className="text-xs">{t('share')}</span>
+                            </Button>
+                        </div>
+
+                        {/* Meta Info */}
+                        <p className="text-xs text-muted-foreground text-center">
+                            {t('publishedOn')} {formatDate(recipe.created_at)}
+                        </p>
                     </div>
                 </div>
             </div>
