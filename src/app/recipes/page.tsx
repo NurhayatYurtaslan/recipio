@@ -1,51 +1,18 @@
-import { getLocale } from 'next-intl/server';
+'use client';
+
+import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/core/Header';
 import { Footer } from '@/components/core/Footer';
 import { Providers } from '@/components/core/Providers';
 import { RecipeList } from '@/components/recipe/RecipeList';
-import { getAllPublicRecipes } from '@/lib/db/public';
 import { Search } from 'lucide-react';
-import type { Metadata } from 'next';
+import { useLocale } from 'next-intl';
 
-interface RecipesPageProps {
-    searchParams: Promise<{ search?: string; category?: string }>;
-}
-
-export async function generateMetadata({ searchParams }: RecipesPageProps): Promise<Metadata> {
-    const params = await searchParams;
-    const locale = await getLocale();
-    
-    if (params.search) {
-        return {
-            title: locale === 'tr' 
-                ? `"${params.search}" Arama Sonuçları - Recipio`
-                : `"${params.search}" Search Results - Recipio`,
-            description: locale === 'tr'
-                ? `${params.search} için tarif arama sonuçları`
-                : `Search results for ${params.search}`,
-        };
-    }
-    
-    return {
-        title: locale === 'tr' ? 'Tüm Tarifler - Recipio' : 'All Recipes - Recipio',
-        description: locale === 'tr' 
-            ? 'Tüm tarifleri keşfedin'
-            : 'Discover all recipes',
-    };
-}
-
-export default async function RecipesPage({ searchParams }: RecipesPageProps) {
-    const locale = await getLocale();
-    const params = await searchParams;
-    const search = params.search || '';
-    const category = params.category || '';
-
-    // Fetch initial recipes with search filter
-    const initialRecipes = await getAllPublicRecipes({
-        search: search || undefined,
-        category: category || undefined,
-        limit: 20,
-    });
+export default function RecipesPage() {
+    const locale = useLocale();
+    const searchParams = useSearchParams();
+    const search = searchParams.get('search') || '';
+    const category = searchParams.get('category') || '';
 
     return (
         <Providers>
@@ -66,8 +33,8 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
                                         </h1>
                                         <p className="text-muted-foreground mt-1">
                                             {locale === 'tr' 
-                                                ? `"${search}" için ${initialRecipes.length} sonuç bulundu`
-                                                : `Found ${initialRecipes.length} results for "${search}"`}
+                                                ? `"${search}" için arama sonuçları`
+                                                : `Search results for "${search}"`}
                                         </p>
                                     </div>
                                 </div>
@@ -76,7 +43,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 
                         {/* Recipe List */}
                         <RecipeList
-                            initialRecipes={initialRecipes}
+                            initialRecipes={[]}
                             search={search || undefined}
                             category={category || undefined}
                             locale={locale}

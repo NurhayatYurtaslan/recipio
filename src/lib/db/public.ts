@@ -1,10 +1,23 @@
 // This file will contain functions to query public data, primarily using the SQL views.
-// Server-side only - uses next/headers
+// Server-side only - uses direct Supabase client for public data (no auth needed)
 // NOTE: Client components should import types/helpers from '@/lib/db/recipe-helpers' directly
 
-import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { RecipeDetail } from './recipe-helpers';
+
+// Create a public Supabase client (no auth/cookies needed for public data)
+const createPublicClient = () => {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
+};
 
 export interface PublicRecipeCard {
     recipe_id: number;
@@ -31,8 +44,7 @@ export interface RecipeFilters {
 }
 
 export async function getAllPublicRecipes(filters?: RecipeFilters): Promise<PublicRecipeCard[]> {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createPublicClient();
 
     let query = supabase
         .from('v_public_recipe_cards')
@@ -71,8 +83,7 @@ export async function getFeaturedRecipes(limit: number = 6): Promise<PublicRecip
 }
 
 export async function getCategories(locale: string = 'en') {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createPublicClient();
 
     const { data, error } = await supabase
         .from('category_translations')
@@ -100,8 +111,7 @@ export interface CategoryInfo {
 }
 
 export async function getCategoryBySlug(slug: string, locale: string = 'en'): Promise<CategoryInfo | null> {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createPublicClient();
 
     // First get category_id from slug
     const { data: category, error: categoryError } = await supabase
@@ -132,8 +142,7 @@ export async function getCategoryBySlug(slug: string, locale: string = 'en'): Pr
 }
 
 export async function getRecipeDetail(recipeId: number): Promise<RecipeDetail | null> {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createPublicClient();
 
     const { data, error } = await supabase
         .from('v_recipe_detail')
