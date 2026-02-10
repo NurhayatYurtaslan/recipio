@@ -53,7 +53,10 @@ Components will be organized by feature under `src/components/`.
     -   `Input.tsx`
     -   `ThemeToggle.tsx`
 -   **`components/user/`**: User-specific components.
-    -   `ProfileForm.tsx`: Edit user profile.
+    -   `ProfileForm.tsx`: Edit user profile form.
+    -   `ProfileHeader.tsx`: Profile header with avatar, name, and email.
+    -   `ProfileStats.tsx`: Display user statistics (favorites, saved, tried counts).
+    -   `SavedRecipesSection.tsx`: Grid display of user's saved recipes.
     -   `UserActions.tsx`: Buttons for favorite, save, try.
     -   `Comments.tsx`: Comment display and submission form.
 -   **`components/admin/`**: Components for the admin dashboard.
@@ -211,7 +214,242 @@ Components will be organized by feature under `src/components/`.
 - Session management via HTTP-only cookies
 - Bilingual support (Turkish/English) for all auth pages
 
-## 4. Data Model & State Flow
+## 4. Profile Page Design & Implementation
+
+### 4.1 Profile Page Overview (`/profile`)
+
+**Purpose:**
+- Display user's profile information (display name, email, avatar, locale preference)
+- Allow users to edit their profile information
+- Show user's saved recipes ("Kayıtlı Tariflerim" section)
+- Display user statistics (total favorites, saved recipes, tried recipes)
+
+**Access Control:**
+- Protected route: Only accessible to authenticated users
+- Users can only view/edit their own profile
+- Redirect to `/login` if not authenticated
+
+### 4.2 Profile Page Layout
+
+**Page Structure:**
+1. **Profile Header Section:**
+   - Avatar image (editable, with upload functionality - future)
+   - Display name (editable)
+   - Email address (read-only, from auth.users)
+   - Account creation date
+   - Locale preference selector (TR/EN)
+
+2. **Profile Statistics Section:**
+   - Total favorites count
+   - Total saved recipes count
+   - Total tried recipes count
+   - Total comments made
+
+3. **Saved Recipes Section ("Kayıtlı Tariflerim"):**
+   - Grid layout of saved recipe cards
+   - Uses `RecipeCard` component for consistency
+   - Shows recipe title, image, description, stats
+   - Clickable cards that navigate to recipe detail page
+   - Empty state message if no saved recipes
+   - Pagination or infinite scroll for large lists
+
+4. **Profile Edit Form:**
+   - Inline editing or modal form
+   - Fields: display_name, avatar_url, locale
+   - Save/Cancel buttons
+   - Success/error feedback
+
+### 4.3 Data Flow & Queries
+
+**Profile Data Query:**
+```typescript
+// Get user profile
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('id', userId)
+  .single();
+
+// Get user email from auth (separate query or from session)
+const { data: { user } } = await supabase.auth.getUser();
+const email = user?.email;
+```
+
+**Saved Recipes Query:**
+```typescript
+// Get user's saved recipes
+const { data: savedRecipes } = await supabase
+  .from('v_user_library')
+  .select('*')
+  .eq('user_id', userId)
+  .eq('engagement_type', 'saved')
+  .order('engaged_at', { ascending: false });
+```
+
+**User Statistics Query:**
+```typescript
+// Get user engagement counts
+const [favorites, saved, tried] = await Promise.all([
+  supabase.from('favorites').select('recipe_id', { count: 'exact' }).eq('user_id', userId),
+  supabase.from('saved_recipes').select('recipe_id', { count: 'exact' }).eq('user_id', userId),
+  supabase.from('tried_recipes').select('recipe_id', { count: 'exact' }).eq('user_id', userId)
+]);
+```
+
+**Profile Update Mutation:**
+```typescript
+// Update user profile
+const { data, error } = await supabase
+  .from('profiles')
+  .update({ display_name, avatar_url, locale })
+  .eq('id', userId)
+  .select()
+  .single();
+```
+
+### 4.4 Component Structure
+
+**Files to Create:**
+- `src/app/profile/page.tsx` - Profile page (server component)
+- `src/components/user/ProfileHeader.tsx` - Profile header with avatar and name
+- `src/components/user/ProfileStats.tsx` - Statistics display component
+- `src/components/user/SavedRecipesSection.tsx` - Saved recipes grid
+- `src/components/user/ProfileForm.tsx` - Profile edit form (reusable)
+
+**Component Hierarchy:**
+```
+ProfilePage (server)
+├── ProfileHeader (client)
+│   ├── Avatar (editable)
+│   ├── Display Name (editable)
+│   └── Email (read-only)
+├── ProfileStats (client)
+│   ├── Favorites Count
+│   ├── Saved Count
+│   ├── Tried Count
+│   └── Comments Count
+└── SavedRecipesSection (client)
+    └── RecipeCard[] (grid)
+```
+
+### 4.5 UI/UX Design
+
+**Design Principles:**
+- Consistent with app's minimalist black/white + accent color theme
+- Responsive grid layout for saved recipes
+- Clear visual hierarchy (header → stats → recipes)
+- Loading states for async data fetching
+- Error handling with user-friendly messages
+- Success feedback after profile updates
+
+**Translation Keys Required:**
+```json
+{
+  "Profile": {
+    "title": "Profil",
+    "editProfile": "Profili Düzenle",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "cancel": "İptal",
+    "displayName": "Görünen İsim",
+    "email": "E-posta",
+    "locale": "Dil Tercihi",
+    "memberSince": "Üyelik Tarihi",
+    "statistics": "İstatistikler",
+    "favorites": "Favoriler",
+    "savedRecipes": "Kayıtlı Tarifler",
+    "triedRecipes": "Denenen Tarifler",
+    "comments": "Yorumlar",
+    "savedRecipesTitle": "Kayıtlı Tariflerim",
+    "noSavedRecipes": "Henüz kayıtlı tarifiniz yok.",
+    "profileUpdated": "Profil başarıyla güncellendi.",
+    "profileUpdateError": "Profil güncellenirken bir hata oluştu."
+  }
+}
+```
+
+### 4.6 Implementation Details
+
+**Authentication Check:**
+- Server component checks authentication status
+- Redirects to `/login` if not authenticated
+- Passes user data to client components
+
+**Data Fetching:**
+- Server-side data fetching for initial load
+- Client-side refetching after mutations
+- Optimistic updates for better UX
+
+**State Management:**
+- Form state managed with React hooks
+- Loading states for async operations
+- Error states for error handling
+
+**RLS Policy Compliance:**
+- All queries respect RLS policies
+- Users can only query their own data
+- Profile updates only allowed for own profile
+
+### 4.7 Supabase Integration
+
+**Database Views:**
+- ✅ `v_user_library` - Used for saved recipes (includes user_id, engagement_type)
+- ✅ `profiles` table - Stores user profile data
+- ✅ RLS policies ensure users can only access their own data
+
+**Required Migrations:**
+- ✅ `0005_fix_user_library_view.sql` - Adds user_id to v_user_library view for proper filtering
+  - Includes user_id field for filtering user's own recipes
+  - Adds description fields (en/tr) for recipe cards
+  - Adds category_slug for filtering/display
+  - View automatically respects RLS policies from underlying tables (favorites, saved_recipes, tried_recipes)
+
+**Query Functions (`src/lib/db/user.ts` - to be created):**
+```typescript
+// Get user profile
+export async function getUserProfile(userId: string)
+
+// Update user profile
+export async function updateUserProfile(userId: string, data: ProfileUpdate)
+
+// Get user's saved recipes
+export async function getUserSavedRecipes(userId: string, locale?: string)
+
+// Get user statistics
+export async function getUserStats(userId: string)
+```
+
+### 4.8 Implementation Status
+
+**Completed:**
+- ✅ Database schema for profiles table
+- ✅ RLS policies for profile access
+- ✅ v_user_library view (fixed to include user_id)
+- ✅ Database trigger for automatic profile creation
+
+**To Be Implemented:**
+- ⏳ Profile page component (`/profile`)
+- ⏳ Profile header component (`ProfileHeader.tsx`)
+- ⏳ Profile statistics component (`ProfileStats.tsx`)
+- ⏳ Saved recipes section component (`SavedRecipesSection.tsx`)
+- ⏳ Profile edit form component (`ProfileForm.tsx`)
+- ⏳ User query functions (`src/lib/db/user.ts`)
+  - `getUserProfile(userId)`
+  - `updateUserProfile(userId, data)`
+  - `getUserSavedRecipes(userId, locale?)`
+  - `getUserStats(userId)`
+- ⏳ Translation keys for profile page (tr.json, en.json)
+- ⏳ Route protection middleware (protect `/profile` route)
+
+**Key Features:**
+- ✅ Automatic profile creation on signup (via database trigger)
+- ✅ User can view their own profile information
+- ✅ User can edit display name, avatar, and locale preference
+- ✅ "Kayıtlı Tariflerim" section displays all saved recipes
+- ✅ User statistics (favorites, saved, tried counts)
+- ✅ All data comes from Supabase (profiles table, v_user_library view)
+- ✅ RLS policies ensure users can only access their own data
+
+## 5. Data Model & State Flow
 
 The database schema is designed around the core entities: `recipes`, `users`, `categories`, and `ingredients`. The key is the `recipe_variants` system.
 
