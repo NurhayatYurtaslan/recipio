@@ -60,7 +60,158 @@ Components will be organized by feature under `src/components/`.
     -   `PendingRecipesList.tsx`: Table/list of recipes awaiting moderation.
     -   `ModerationControls.tsx`: Buttons for admin to approve/reject recipes.
 
-## 3. Data Model & State Flow
+## 3. Authentication Design & Implementation
+
+### 3.1 Login Page (`/login`)
+
+**Design:**
+- Minimalist, centered card layout matching the app's black/white + accent color theme
+- Form fields:
+  - Email input (required, email validation)
+  - Password input (required, type="password")
+  - "Remember me" checkbox (optional)
+  - Submit button (primary action)
+- Error handling: Display Supabase auth errors in a user-friendly way
+- Loading state: Show loading indicator during authentication
+- Success: Redirect to `/onboarding` for new users or `/home` for returning users
+
+**Implementation Details:**
+- Uses Supabase `signInWithPassword()` method from `@supabase/auth-helpers-nextjs`
+- Client component (`'use client'`) for form interactivity
+- Form validation using HTML5 validation + custom error messages
+- i18n support: All text strings from translation files (`tr.json`, `en.json`)
+- Responsive design: Mobile-first, works on all screen sizes
+
+**Translation Keys Required:**
+```json
+{
+  "Auth": {
+    "login": "Giriş Yap",
+    "email": "E-posta",
+    "password": "Şifre",
+    "rememberMe": "Beni hatırla",
+    "forgotPassword": "Şifremi unuttum",
+    "noAccount": "Hesabın yok mu?",
+    "signUp": "Kayıt Ol",
+    "loginError": "Giriş başarısız",
+    "invalidCredentials": "E-posta veya şifre hatalı"
+  }
+}
+```
+
+### 3.2 Sign Up Page (`/signup`)
+
+**Design:**
+- Located below the login form on the same page OR as a separate route
+- If on same page: Toggle between login/signup modes
+- If separate: Link at bottom of login page: "Eğer hesabın yoksa, Kayıt Ol" (Turkish) / "Don't have an account? Sign Up" (English)
+- Form fields:
+  - Email input (required, email validation)
+  - Password input (required, min 6 characters, show strength indicator)
+  - Confirm Password input (required, must match password)
+  - Display Name input (optional, can be set during onboarding)
+  - Terms & Conditions checkbox (required)
+  - Submit button (primary action)
+
+**Implementation Details:**
+- Uses Supabase `signUp()` method
+- Automatic profile creation via database trigger (`handle_new_user()` function)
+- Email confirmation: Configure Supabase to send confirmation emails (optional, can be disabled for development)
+- After successful signup: Redirect to `/onboarding` to complete profile setup
+- Error handling: Display validation errors (weak password, email already exists, etc.)
+
+**Translation Keys Required:**
+```json
+{
+  "Auth": {
+    "signUp": "Kayıt Ol",
+    "confirmPassword": "Şifreyi Onayla",
+    "displayName": "Görünen İsim",
+    "termsAccept": "Şartları kabul ediyorum",
+    "alreadyHaveAccount": "Zaten hesabın var mı?",
+    "login": "Giriş Yap",
+    "signUpError": "Kayıt başarısız",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordTooShort": "Şifre en az 6 karakter olmalı"
+  }
+}
+```
+
+### 3.3 Supabase Integration
+
+**Authentication Flow:**
+1. User submits login/signup form
+2. Client calls Supabase auth API (`signInWithPassword()` or `signUp()`)
+3. Supabase validates credentials and creates/updates session
+4. Database trigger (`on_auth_user_created`) automatically creates:
+   - Profile record in `public.profiles` table
+   - User role record in `public.user_roles` table (default: 'user')
+5. Session cookie is set via Supabase auth helpers
+6. Middleware validates session on protected routes
+7. Client redirects based on user state (new user → `/onboarding`, existing → `/home`)
+
+**Required Supabase Setup:**
+- ✅ Database trigger `handle_new_user()` exists (creates profile + role)
+  - Automatically creates profile record when user signs up
+  - Uses email as fallback for display_name if not provided in metadata
+  - Sets default role as 'user' in `user_roles` table
+- ✅ RLS policies for `profiles` table (users can read all, update own)
+- ✅ Auth callback route: `/api/auth/callback/route.ts` (handles OAuth redirects and code exchange)
+- ✅ Migration `0004_improve_user_trigger.sql` improves trigger to handle email/password signups
+- ⚠️ Email templates configured in Supabase dashboard (for production)
+- ⚠️ Password reset flow (optional, can be added later)
+
+**Files to Create:**
+- `src/app/login/page.tsx` - Login page component
+- `src/app/signup/page.tsx` - Sign up page component (OR combined with login)
+- `src/components/auth/AuthForm.tsx` - Reusable auth form component (optional)
+- ✅ `src/app/api/auth/callback/route.ts` - OAuth callback handler (created)
+- Update `src/localizations/tr.json` and `en.json` with auth translations
+
+**Supabase Migrations:**
+- ✅ `0001_init.sql` - Base schema with `handle_new_user()` trigger
+- ✅ `0004_improve_user_trigger.sql` - Improved trigger for email/password signups
+
+**Security Considerations:**
+- All authentication happens server-side via Supabase
+- Passwords are never stored in plain text (handled by Supabase)
+- RLS policies ensure users can only access their own data
+- Session tokens are HTTP-only cookies (handled by `@supabase/auth-helpers-nextjs`)
+
+### 3.4 Route Protection
+
+**Middleware Implementation:**
+- Check authentication status using Supabase middleware client
+- Protected routes: `/profile`, `/favorites`, `/saved`, `/submit-recipe`, `/admin/*`
+- Redirect unauthenticated users to `/login` with return URL
+- Allow public access to: `/`, `/recipes`, `/recipes/[id]`, `/login`, `/signup`
+
+### 3.5 Implementation Status
+
+**Completed:**
+- ✅ Supabase client setup (browser, server, middleware)
+- ✅ Database trigger for automatic profile creation
+- ✅ Auth callback route for OAuth flows
+- ✅ Improved trigger function for email/password signups
+- ✅ RLS policies for user data protection
+
+**To Be Implemented:**
+- ⏳ Login page component (`/login`)
+- ⏳ Sign up page component (`/signup`)
+- ⏳ Auth form component (optional, reusable)
+- ⏳ Translation keys for auth pages (tr.json, en.json)
+- ⏳ Middleware updates for route protection
+- ⏳ Header component updates (show user menu when logged in)
+- ⏳ Logout functionality
+
+**Design Principles:**
+- All authentication data comes from Supabase (no local storage of credentials)
+- Email/password authentication with optional OAuth providers
+- Automatic profile creation via database trigger
+- Session management via HTTP-only cookies
+- Bilingual support (Turkish/English) for all auth pages
+
+## 4. Data Model & State Flow
 
 The database schema is designed around the core entities: `recipes`, `users`, `categories`, and `ingredients`. The key is the `recipe_variants` system.
 
