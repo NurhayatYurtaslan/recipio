@@ -47,6 +47,8 @@ Components will be organized by feature under `src/components/`.
     -   `ServingsStepper.tsx`: ✅ Integrated into `RecipeDetail` as a dropdown selector.
     -   `IngredientsList.tsx`: ✅ Integrated into `RecipeDetail` component.
     -   `StepsList.tsx`: ✅ Integrated into `RecipeDetail` component.
+-   **`components/category/`**: Components related to category pages.
+    -   `CategoryHeader.tsx`: Category header with image, name, and description (optional).
 -   **`components/ui/`**: Generic, reusable UI elements (inspired by shadcn/ui).
     -   `Button.tsx`
     -   `Card.tsx`
@@ -214,7 +216,180 @@ Components will be organized by feature under `src/components/`.
 - Session management via HTTP-only cookies
 - Bilingual support (Turkish/English) for all auth pages
 
-## 4. Profile Page Design & Implementation
+## 4. Category Page Design & Implementation
+
+### 4.1 Category Page Overview (`/categories/[slug]`)
+
+**Purpose:**
+- Display all recipes belonging to a specific category
+- Show category information (name, description, image)
+- Provide breadcrumb navigation back to home
+- Allow users to browse recipes filtered by category
+
+**Access Control:**
+- Public route: Accessible to all users (anonymous and authenticated)
+- No authentication required
+
+### 4.2 Category Page Layout
+
+**Page Structure:**
+1. **Category Header Section:**
+   - Category image (if available)
+   - Category name (localized)
+   - Category description (if available)
+   - Breadcrumb navigation (Home > Categories > [Category Name])
+
+2. **Recipes Grid Section:**
+   - Grid layout of recipe cards using `RecipeCard` component
+   - Shows all published recipes in this category
+   - Uses `RecipeList` component for consistency
+   - Empty state message if no recipes found
+   - Pagination or infinite scroll for large lists
+
+3. **Page Metadata:**
+   - SEO-friendly title: "[Category Name] Recipes - Recipio"
+   - Meta description from category description
+
+### 4.3 Data Flow & Queries
+
+**Category Information Query:**
+```typescript
+// Get category by slug
+const category = await getCategoryBySlug(slug, locale);
+
+// Returns:
+// {
+//   category_id: number,
+//   locale: string,
+//   name: string,
+//   description: string | null,
+//   categories: {
+//     slug: string,
+//     image_url: string | null
+//   }
+// }
+```
+
+**Category Recipes Query:**
+```typescript
+// Get recipes for category
+const recipes = await getAllPublicRecipes({
+  category: slug,
+  limit: 20,
+  offset: 0
+});
+
+// Uses existing v_public_recipe_cards view
+// Filters by category_slug field
+```
+
+**Implementation:**
+- Server component fetches category info and initial recipes
+- Client component (`RecipeList`) handles filtering and pagination
+- Uses existing `v_public_recipe_cards` view with `category_slug` filter
+
+### 4.4 Component Structure
+
+**Files to Create:**
+- `src/app/categories/[slug]/page.tsx` - Category page (server component)
+- `src/components/category/CategoryHeader.tsx` - Category header with image, name, description (optional)
+
+**Component Hierarchy:**
+```
+CategoryPage (server)
+├── CategoryHeader (client, optional)
+│   ├── Category Image
+│   ├── Category Name
+│   └── Category Description
+└── RecipeList (client)
+    └── RecipeCard[] (grid, filtered by category)
+```
+
+### 4.5 UI/UX Design
+
+**Design Principles:**
+- Consistent with app's minimalist black/white + accent color theme
+- Category header matches homepage category card style
+- Responsive grid layout for recipes
+- Clear visual hierarchy (header → recipes)
+- Loading states for async data fetching
+- Error handling with user-friendly messages (404 if category not found)
+
+**Navigation:**
+- Update `CategorySection` component to link to `/categories/[slug]` instead of `/recipes?category=[slug]`
+- Breadcrumb navigation: Home > Categories > [Category Name]
+
+**Translation Keys Required:**
+```json
+{
+  "CategoryPage": {
+    "title": "{categoryName} Tarifleri",
+    "noRecipes": "Bu kategoride henüz tarif bulunmamaktadır.",
+    "backToCategories": "Kategorilere Dön",
+    "recipesInCategory": "{count} tarif bulundu",
+    "categoryNotFound": "Kategori bulunamadı"
+  }
+}
+```
+
+### 4.6 Implementation Details
+
+**Route Structure:**
+- Dynamic route: `/categories/[slug]`
+- Slug comes from `categories.slug` field
+- Locale-aware: Category name/description based on user's locale preference
+
+**Error Handling:**
+- 404 page if category slug doesn't exist
+- Empty state if category exists but has no recipes
+- Fallback to default locale if translation not available
+
+**SEO Considerations:**
+- Dynamic meta title: "[Category Name] Recipes - Recipio"
+- Meta description from category description
+- Structured data for category pages (optional, future enhancement)
+
+### 4.7 Supabase Integration
+
+**Database Views:**
+- ✅ `v_public_recipe_cards` - Already includes `category_slug` field for filtering
+- ✅ `categories` table - Stores category slugs
+- ✅ `category_translations` table - Stores localized category names/descriptions
+
+**Query Functions (`src/lib/db/public.ts`):**
+- ✅ `getAllPublicRecipes(filters?)` - Supports category filtering via `category_slug`
+- ✅ `getCategoryBySlug(slug, locale)` - New function to get category info by slug
+
+**No Additional Migrations Required:**
+- All necessary database structures already exist
+- `v_public_recipe_cards` view already includes `category_slug` field
+- Category filtering works with existing view structure
+
+### 4.8 Implementation Status
+
+**Completed:**
+- ✅ Database schema for categories (categories, category_translations tables)
+- ✅ `v_public_recipe_cards` view includes `category_slug` field
+- ✅ `getAllPublicRecipes()` function supports category filtering
+- ✅ `getCategoryBySlug()` function added to `public.ts`
+
+**To Be Implemented:**
+- ⏳ Category page component (`/categories/[slug]/page.tsx`)
+- ⏳ Category header component (optional)
+- ⏳ Update `CategorySection` component (`src/components/home/CategorySection.tsx`)
+  - Change link from `href={`/recipes?category=${category.categories.slug}`}` 
+  - To: `href={`/categories/${category.categories.slug}`}`
+- ⏳ Translation keys for category page
+- ⏳ 404 handling for invalid category slugs
+- ⏳ Breadcrumb navigation component
+
+**Key Features:**
+- ✅ All recipes filtered by category using existing database view
+- ✅ Category information displayed with localized name/description
+- ✅ Consistent UI with homepage recipe grid
+- ✅ SEO-friendly URLs (`/categories/soups` instead of `/recipes?category=soups`)
+
+## 5. Profile Page Design & Implementation
 
 ### 4.1 Profile Page Overview (`/profile`)
 

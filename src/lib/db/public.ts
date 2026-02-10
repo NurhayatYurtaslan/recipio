@@ -87,6 +87,49 @@ export async function getCategories(locale: string = 'en') {
     return data || [];
 }
 
+export interface CategoryInfo {
+    category_id: number;
+    locale: string;
+    name: string;
+    description: string | null;
+    categories: {
+        slug: string;
+        image_url: string | null;
+    };
+}
+
+export async function getCategoryBySlug(slug: string, locale: string = 'en'): Promise<CategoryInfo | null> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+
+    // First get category_id from slug
+    const { data: category, error: categoryError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', slug)
+        .single();
+
+    if (categoryError || !category) {
+        console.error('Error fetching category by slug:', categoryError);
+        return null;
+    }
+
+    // Then get translation
+    const { data: translation, error: translationError } = await supabase
+        .from('category_translations')
+        .select('*, categories:category_id(slug, image_url)')
+        .eq('category_id', category.id)
+        .eq('locale', locale)
+        .single();
+
+    if (translationError || !translation) {
+        console.error('Error fetching category translation:', translationError);
+        return null;
+    }
+
+    return translation as CategoryInfo;
+}
+
 export async function getRecipeDetail(recipeId: number): Promise<RecipeDetail | null> {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
