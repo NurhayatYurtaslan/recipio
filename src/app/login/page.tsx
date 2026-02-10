@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/browser';
@@ -20,6 +20,17 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCheckingAuth(false);
+      if (session) {
+        router.replace('/home');
+      }
+    });
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +64,19 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <Providers>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1 flex items-center justify-center">
+            <p className="text-muted-foreground">...</p>
+          </main>
+        </div>
+      </Providers>
+    );
+  }
 
   return (
     <Providers>

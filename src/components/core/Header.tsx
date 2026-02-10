@@ -1,19 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ChefHat, Search } from 'lucide-react';
+import { ChefHat, Search, User, LogOut } from 'lucide-react';
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { createClient } from '@/lib/supabase/browser';
+import type { User } from '@supabase/supabase-js';
 
 export function Header() {
     const t = useTranslations('Header');
     const [searchQuery, setSearchQuery] = useState('');
+    const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
+
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null);
+        });
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+        return () => subscription.unsubscribe();
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,6 +37,20 @@ export function Header() {
             router.push(`/recipes?search=${encodeURIComponent(searchQuery.trim())}`);
         }
     };
+
+    const handleLogout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push('/');
+        router.refresh();
+    };
+
+    const displayName =
+        user?.user_metadata?.full_name?.trim() ||
+        user?.user_metadata?.display_name?.trim() ||
+        user?.email?.split('@')[0] ||
+        user?.email ||
+        t('profile');
 
     return (
         <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -61,11 +91,35 @@ export function Header() {
                         </nav>
                         <ThemeToggle />
                         <LanguageSwitcher />
-                        <Link href="/login">
-                            <Button variant="default" size="sm">
-                                {t('login')}
-                            </Button>
-                        </Link>
+                        {user ? (
+                            <>
+                                <Link href="/home">
+                                    <Button variant="ghost" size="sm" className="gap-1.5">
+                                        <User className="h-4 w-4" />
+                                        <span className="hidden sm:inline max-w-[120px] truncate" title={displayName}>
+                                            {displayName}
+                                        </span>
+                                    </Button>
+                                </Link>
+                                <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1.5">
+                                    <LogOut className="h-4 w-4" />
+                                    <span className="hidden sm:inline">{t('logout')}</span>
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/login">
+                                    <Button variant="ghost" size="sm">
+                                        {t('login')}
+                                    </Button>
+                                </Link>
+                                <Link href="/signup">
+                                    <Button variant="default" size="sm">
+                                        {t('signUp')}
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

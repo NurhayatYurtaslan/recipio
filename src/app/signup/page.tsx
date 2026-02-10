@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/browser';
@@ -24,6 +24,17 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCheckingAuth(false);
+      if (session) {
+        router.replace('/home');
+      }
+    });
+  }, [router]);
 
   const validateForm = () => {
     // Reset errors
@@ -119,7 +130,14 @@ export default function SignUpPage() {
         fetch('http://127.0.0.1:7243/ingest/72ae24f2-6fe3-4c22-a4bc-f149b3860c8b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:97',message:'SignUp error occurred',data:{errorCode:signUpError.status,errorMessage:signUpError.message,isRateLimit:signUpError.message?.toLowerCase().includes('rate limit')},timestamp:Date.now(),runId:'run1',hypothesisId:'B'})}).catch(()=>{});
         // #endregion
         console.error('[signup] Supabase error:', signUpError)
-        setError(signUpError.message || t('signUpError'))
+        const isRateLimit = signUpError.message?.toLowerCase().includes('rate limit')
+        setError(
+          isRateLimit
+            ? (locale === 'tr'
+                ? 'Çok fazla deneme. Biraz bekleyin veya Supabase Dashboard → Authentication → Providers → Email bölümünden "Confirm email"i kapatın (geliştirme için).'
+                : 'Too many attempts. Wait a while or disable "Confirm email" in Supabase Dashboard → Authentication → Providers → Email (for development).')
+            : signUpError.message || t('signUpError')
+        )
         setLoading(false)
         return
       }
@@ -160,6 +178,19 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <Providers>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1 flex items-center justify-center">
+            <p className="text-muted-foreground">...</p>
+          </main>
+        </div>
+      </Providers>
+    );
+  }
 
   return (
     <Providers>
