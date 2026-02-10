@@ -79,7 +79,7 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
         <div className="min-h-screen bg-background">
             {/* Header Section - Simplified */}
             <div className="border-b bg-card">
-                <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
+                <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
                     {/* Back Button */}
                     <Link 
                         href="/"
@@ -96,7 +96,7 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
                                 {localized.categoryName}
                             </Badge>
                         )}
-                        <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                             {localized.title}
                         </h1>
                         
@@ -134,51 +134,51 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
             )}
 
             {/* Main Content */}
-            <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                     {/* Left Column - Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-10">
                         {/* Description */}
                         {localized.description && (
-                            <div className="prose prose-slate dark:prose-invert max-w-none">
-                                <p className="text-base text-muted-foreground leading-relaxed">
+                            <div className="prose prose-slate dark:prose-invert max-w-none prose-lg">
+                                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
                                     {localized.description}
                                 </p>
                             </div>
                         )}
 
                         {/* Instructions */}
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-semibold flex items-center gap-2">
-                                <ListOrdered className="h-5 w-5" />
+                        <div className="space-y-8">
+                            <h2 className="text-3xl md:text-4xl font-semibold flex items-center gap-3">
+                                <ListOrdered className="h-6 w-6" />
                                 {t('instructions')}
                             </h2>
                             
                             {steps.length > 0 ? (
                                 <>
-                                    <ol className="space-y-4">
+                                    <ol className="space-y-6">
                                         {steps.map((step) => (
                                             <li 
                                                 key={step.step_number}
-                                                className={`flex gap-4 p-4 rounded-lg transition-colors cursor-pointer ${
+                                                className={`flex gap-6 p-6 rounded-lg transition-colors cursor-pointer ${
                                                     completedSteps.includes(step.step_number)
                                                         ? 'bg-muted/50'
                                                         : 'hover:bg-muted/30'
                                                 }`}
                                                 onClick={() => toggleStep(step.step_number)}
                                             >
-                                                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                                                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${
                                                     completedSteps.includes(step.step_number)
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-foreground'
                                                 }`}>
                                                     {completedSteps.includes(step.step_number) ? (
-                                                        <CheckCircle2 className="h-4 w-4" />
+                                                        <CheckCircle2 className="h-5 w-5" />
                                                     ) : (
                                                         step.step_number
                                                     )}
                                                 </div>
-                                                <p className={`text-base leading-relaxed flex-1 pt-1 ${
+                                                <p className={`text-lg md:text-xl leading-relaxed flex-1 pt-1 ${
                                                     completedSteps.includes(step.step_number)
                                                         ? 'text-muted-foreground line-through'
                                                         : ''
@@ -223,12 +223,12 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
 
                         {/* Tips */}
                         {localized.tips && (
-                            <div className="p-6 rounded-lg border bg-muted/30">
-                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                    <Lightbulb className="h-5 w-5" />
+                            <div className="p-8 rounded-lg border bg-muted/30">
+                                <h3 className="text-2xl font-semibold mb-4 flex items-center gap-3">
+                                    <Lightbulb className="h-6 w-6" />
                                     {t('tips')}
                                 </h3>
-                                <p className="text-base leading-relaxed text-muted-foreground">
+                                <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">
                                     {localized.tips}
                                 </p>
                             </div>
@@ -238,9 +238,9 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
                     {/* Right Column - Ingredients Sidebar */}
                     <div className="lg:sticky lg:top-8 space-y-6">
                         {/* Ingredients Card */}
-                        <div className="border rounded-lg bg-card p-6">
-                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                                <ShoppingBasket className="h-5 w-5" />
+                        <div className="border rounded-lg bg-card p-8">
+                            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
+                                <ShoppingBasket className="h-6 w-6" />
                                 {t('ingredients')}
                             </h2>
                             
@@ -273,43 +273,43 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
                             {/* Ingredients List */}
                             {ingredients.length > 0 ? (
                                 <>
-                                    <ul className="space-y-2">
+                                    <ul className="space-y-3">
                                         {ingredients.map((ingredient, index) => {
                                             const isChecked = checkedIngredients.has(index);
                                             return (
                                                 <li 
                                                     key={index}
-                                                    className={`flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer ${
+                                                    className={`flex items-start gap-4 p-4 rounded-lg transition-colors cursor-pointer ${
                                                         isChecked 
                                                             ? 'bg-muted/50' 
                                                             : 'hover:bg-muted/30'
                                                     }`}
                                                     onClick={() => toggleIngredient(index)}
                                                 >
-                                                    <div className="flex-shrink-0 mt-0.5">
+                                                    <div className="flex-shrink-0 mt-1">
                                                         <input
                                                             type="checkbox"
                                                             checked={isChecked}
                                                             onChange={() => toggleIngredient(index)}
                                                             onClick={(e) => e.stopPropagation()}
-                                                            className="w-4 h-4 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                                                            className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-start justify-between gap-4">
-                                                            <span className={`text-sm font-medium flex-1 ${
+                                                            <span className={`text-base font-medium flex-1 ${
                                                                 isChecked 
                                                                     ? 'text-muted-foreground line-through' 
                                                                     : ''
                                                             }`}>
                                                                 {ingredient.name}
                                                                 {ingredient.note && (
-                                                                    <span className="block text-xs text-muted-foreground mt-1">
+                                                                    <span className="block text-sm text-muted-foreground mt-1.5">
                                                                         {ingredient.note}
                                                                     </span>
                                                                 )}
                                                             </span>
-                                                            <span className={`text-sm font-semibold text-right whitespace-nowrap ${
+                                                            <span className={`text-base font-semibold text-right whitespace-nowrap ${
                                                                 isChecked ? 'text-muted-foreground' : ''
                                                             }`}>
                                                                 {ingredient.amount} {ingredient.unit}

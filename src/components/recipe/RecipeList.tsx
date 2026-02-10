@@ -38,7 +38,8 @@ export function RecipeList({ initialRecipes = [], category, search, locale = 'en
                 }
 
                 if (search) {
-                    query = query.ilike('title', `%${search}%`);
+                    // Search in both English and Turkish title fields
+                    query = query.or(`title_en.ilike.%${search}%,title_tr.ilike.%${search}%`);
                 }
 
                 const { data, error: fetchError } = await query;

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChefHat, Search } from 'lucide-react';
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -52,18 +53,19 @@ export function Header() {
                     {/* Actions */}
                     <div className="flex items-center gap-2 shrink-0">
                         <nav className="hidden md:flex items-center">
-                            <Button variant="ghost" size="sm" asChild>
-                                <Link href="/recipes">
+                            <Link href="/recipes">
+                                <Button variant="ghost" size="sm">
                                     {t('recipes')}
-                                </Link>
-                            </Button>
-                        </nav>
-                        <LanguageSwitcher />
-                        <Button variant="default" size="sm" asChild>
-                            <Link href="/login">
-                                {t('login')}
+                                </Button>
                             </Link>
-                        </Button>
+                        </nav>
+                        <ThemeToggle />
+                        <LanguageSwitcher />
+                        <Link href="/login">
+                            <Button variant="default" size="sm">
+                                {t('login')}
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </div>
