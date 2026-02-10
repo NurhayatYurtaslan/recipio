@@ -17,8 +17,9 @@ function LocaleSwitchingContent() {
             window.location.href = base + next;
             return;
         }
-        document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000;SameSite=Lax`;
         const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const path = base && base !== '' ? base : '/';
+        document.cookie = `NEXT_LOCALE=${locale};path=${path};max-age=31536000;SameSite=Lax`;
         window.location.href = base + next;
     }, [locale, next]);
 

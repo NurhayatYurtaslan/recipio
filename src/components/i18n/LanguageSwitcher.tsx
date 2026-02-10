@@ -1,19 +1,19 @@
 'use client';
 
-import { useLocale } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Languages } from 'lucide-react';
+import { useClientLocale } from '@/components/i18n/ClientLocaleProvider';
 
 export default function LanguageSwitcher() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const locale = useLocale();
+    const { locale, setLocale } = useClientLocale();
+    const [switching, setSwitching] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const nextLocale = e.target.value as 'tr' | 'en';
         if (nextLocale === locale) return;
-        const next = pathname || '/';
-        router.push(`/locale-switching?locale=${nextLocale}&next=${encodeURIComponent(next)}`);
+        setSwitching(true);
+        setLocale(nextLocale);
+        setSwitching(false);
     };
 
     return (
@@ -22,7 +22,9 @@ export default function LanguageSwitcher() {
             <select
                 value={locale}
                 onChange={handleChange}
-                className="pl-9 pr-4 py-2 text-sm rounded-md border bg-transparent appearance-none cursor-pointer"
+                disabled={switching}
+                aria-label="Language"
+                className="pl-9 pr-4 py-2 text-sm rounded-md border bg-transparent appearance-none cursor-pointer disabled:opacity-70"
             >
                 <option value="tr">🇹🇷 TR</option>
                 <option value="en">🇬🇧 EN</option>
