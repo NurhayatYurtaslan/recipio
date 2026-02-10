@@ -11,6 +11,7 @@
   "dependencies": {
     "@iconify/react": "^4.1.1",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.43.4",
     "framer-motion": "^11.2.6",
     "lucide-react": "^0.379.0",

@@ -92,21 +92,23 @@ export default function SignUpPage() {
       fetch('http://127.0.0.1:7243/ingest/72ae24f2-6fe3-4c22-a4bc-f149b3860c8b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:87',message:'Before signUp call',data:{hasMetadata:Object.keys(metadata).length>0,windowOrigin:typeof window !== 'undefined' ? window.location.origin : 'undefined'},timestamp:Date.now(),runId:'run2',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
 
-      // For development: disable email confirmation to avoid rate limits
-      // When emailRedirectTo is NOT provided, Supabase won't send confirmation emails
-      // This prevents rate limit errors during development
+      // Redirect after email confirmation: Supabase Dashboard'da "Confirm email" açıksa
+      // bu URL'deki linke tıklanınca session oluşur (callback route).
+      const redirectUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/api/auth/callback`
+          : undefined
+
       const signUpOptions: any = {
         data: metadata,
-        // Explicitly set to undefined to disable email confirmation
-        // Remove this line in production if you want email confirmation
-        emailRedirectTo: undefined,
-      };
+        emailRedirectTo: redirectUrl,
+      }
 
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: signUpOptions,
-      });
+      })
 
       // #region agent log
       fetch('http://127.0.0.1:7243/ingest/72ae24f2-6fe3-4c22-a4bc-f149b3860c8b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:95',message:'After signUp call',data:{hasError:!!signUpError,errorMessage:signUpError?.message,hasUser:!!data?.user,hasSession:!!data?.session},timestamp:Date.now(),runId:'run1',hypothesisId:'A'})}).catch(()=>{});
@@ -116,9 +118,16 @@ export default function SignUpPage() {
         // #region agent log
         fetch('http://127.0.0.1:7243/ingest/72ae24f2-6fe3-4c22-a4bc-f149b3860c8b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'signup/page.tsx:97',message:'SignUp error occurred',data:{errorCode:signUpError.status,errorMessage:signUpError.message,isRateLimit:signUpError.message?.toLowerCase().includes('rate limit')},timestamp:Date.now(),runId:'run1',hypothesisId:'B'})}).catch(()=>{});
         // #endregion
-        setError(signUpError.message || t('signUpError'));
-        setLoading(false);
-        return;
+        console.error('[signup] Supabase error:', signUpError)
+        setError(signUpError.message || t('signUpError'))
+        setLoading(false)
+        return
+      }
+
+      if (!data) {
+        setError(t('signUpError') + ' (no response)')
+        setLoading(false)
+        return
       }
 
       // Check if email confirmation is required
@@ -139,9 +148,13 @@ export default function SignUpPage() {
         router.refresh();
       }
     } catch (err: any) {
-      console.error('Sign up error:', err);
-      setError(err?.message || t('signUpError'));
-      setLoading(false);
+      console.error('[signup] Error:', err)
+      const message =
+        err?.message ||
+        (typeof err === 'string' ? err : null) ||
+        t('signUpError')
+      setError(message)
+      setLoading(false)
     } finally {
       // Ensure loading is set to false even if something goes wrong
       setLoading(false);
