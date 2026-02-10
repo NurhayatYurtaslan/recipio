@@ -20,10 +20,18 @@ The following **Repository secrets** must be defined for the Actions build:
 
 ## How to deploy
 
-1. Push to the `main` branch, or go to the Actions tab and run the **Deploy to GitHub Pages** workflow with **Run workflow**.
-2. After deploy completes, the site is available at:  
-   `https://<username>.github.io/<repo-name>/`  
-   e.g. `https://username.github.io/recipio/`
+1. **Enable Pages:** Repo → **Settings → Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch”). Save.
+2. Push to the `main` branch, or go to the **Actions** tab and run the **Deploy to GitHub Pages** workflow.
+3. After the workflow finishes, open the site at the **project URL** (see below). Do not use `https://<username>.github.io` alone—that is the user site and will show “There isn’t a GitHub Pages site here.”
+
+## Correct site URL (important)
+
+This app is deployed as a **project site**, not a user site. You must use:
+
+- **URL:** `https://<username>.github.io/<repo-name>/`
+- **Example:** `https://octocat.github.io/recipio/`
+
+Use your GitHub username and the **repository name** (e.g. `recipio`). The trailing slash is optional. If you open `https://<username>.github.io` without the repo name, you will get a 404 “There isn’t a GitHub Pages site here.”
 
 ## Static export notes
 
@@ -34,6 +42,12 @@ The following **Repository secrets** must be defined for the Actions build:
 
 ## Troubleshooting
 
-- **Pages 404:** Check that the repo name and basePath match; the URL should include the basePath (e.g. `/recipio/`).
+- **README or repo files show instead of the app:**  
+  GitHub is serving the **branch** (e.g. `main`) as a static site, not the **Actions** build. Fix: go to **Settings → Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch”). Save. Then run the **Deploy to GitHub Pages** workflow from the **Actions** tab once. After it finishes, the site will serve the built app from the workflow artifact.
+- **“There isn’t a GitHub Pages site here” (404):**
+  1. Use the **project URL** with the repo name: `https://<username>.github.io/<repo-name>/` (e.g. `https://username.github.io/recipio/`). Do not use `https://<username>.github.io` only.
+  2. In the repo go to **Settings → Pages** and set **Source** to **GitHub Actions**.
+  3. Run the **Deploy to GitHub Pages** workflow from the **Actions** tab and wait until it completes.
+- **404 on refresh / other 404s:** The URL must include the repo name (basePath). Use links that start with `/<repo-name>/` (e.g. `/recipio/`).
 - **“generateStaticParams” error on build:** Ensure `generateStaticParams` is defined for dynamic pages and that Supabase env vars (secrets) are set during build.
 - **Auth callback not working:** Make sure the redirect URL is configured in Supabase and that you are using `/auth/callback` (the page, not the API).
