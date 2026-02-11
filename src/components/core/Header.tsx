@@ -122,15 +122,6 @@ export function Header() {
                                         {t('login')}
                                     </Button>
                                 </Link>
-                                <Link href="/signup">
-                                    <Button 
-                                        variant="default" 
-                                        size="sm"
-                                        className="bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                                    >
-                                        {t('signUp')}
-                                    </Button>
-                                </Link>
                             </>
                         )}
                     </div>
