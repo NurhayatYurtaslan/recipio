@@ -7,8 +7,6 @@ import { useTranslations } from 'next-intl';
 import { ChefHat, Search, User as UserIcon, LogOut } from 'lucide-react';
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase/browser';
 import type { User } from '@supabase/supabase-js';
 
@@ -52,77 +50,75 @@ export function Header() {
         user?.email ||
         t('profile');
 
+    const linkClass =
+        'text-sm text-muted-foreground hover:text-foreground transition-colors';
+
     return (
-        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex h-16 items-center gap-4">
+                <div className="flex h-14 items-center gap-6">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                            <ChefHat className="h-5 w-5 text-primary" />
-                        </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent hidden sm:inline">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 shrink-0 text-foreground hover:opacity-80 transition-opacity"
+                    >
+                        <ChefHat className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-base font-semibold tracking-tight hidden sm:inline">
                             Recipio
                         </span>
                     </Link>
 
-                    {/* Search - Center */}
-                    <form onSubmit={handleSearch} className="flex-1 max-w-md mx-auto">
+                    {/* Search */}
+                    <form
+                        onSubmit={handleSearch}
+                        className="flex-1 max-w-xs sm:max-w-sm mx-auto"
+                    >
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
+                            <input
                                 type="search"
                                 placeholder={t('search')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 pr-4 h-10 w-full bg-muted/50 border-0 focus-visible:ring-1"
+                                className="w-full h-8 pl-8 pr-3 rounded-md text-sm bg-muted/40 border-0 placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-muted-foreground/20"
                             />
                         </div>
                     </form>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0">
-                        <nav className="hidden md:flex items-center">
-                            <Link href="/recipes">
-                                <Button variant="ghost" size="sm">
-                                    {t('recipes')}
-                                </Button>
-                            </Link>
-                        </nav>
+                    <div className="flex items-center gap-1 shrink-0">
                         <ThemeToggle />
                         <LanguageSwitcher />
+                        <div className="w-px h-4 bg-border/60 mx-1 hidden sm:block" />
                         {user ? (
                             <>
-                                <Link href="/home">
-                                    <Button variant="ghost" size="sm" className="gap-1.5">
-                                        <UserIcon className="h-4 w-4" />
-                                        <span className="hidden sm:inline max-w-[120px] truncate" title={displayName}>
-                                            {displayName}
-                                        </span>
-                                    </Button>
-                                </Link>
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={handleLogout} 
-                                    className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 hover:border-destructive hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                                <Link
+                                    href="/home"
+                                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded ${linkClass}`}
+                                    title={displayName}
                                 >
-                                    <LogOut className="h-4 w-4" />
-                                    <span className="hidden sm:inline font-medium">{t('logout')}</span>
-                                </Button>
+                                    <UserIcon className="h-4 w-4 shrink-0" />
+                                    <span className="hidden sm:inline max-w-[100px] truncate text-sm">
+                                        {displayName}
+                                    </span>
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-sm text-muted-foreground hover:text-foreground transition-colors`}
+                                    aria-label={t('logout')}
+                                >
+                                    <LogOut className="h-4 w-4 shrink-0" />
+                                    <span className="hidden sm:inline">{t('logout')}</span>
+                                </button>
                             </>
                         ) : (
-                            <>
-                                <Link href="/login">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm"
-                                        className="hover:bg-accent/50 transition-all duration-200"
-                                    >
-                                        {t('login')}
-                                    </Button>
-                                </Link>
-                            </>
+                            <Link
+                                href="/login"
+                                className={`px-2 py-1.5 rounded ${linkClass}`}
+                            >
+                                {t('login')}
+                            </Link>
                         )}
                     </div>
                 </div>
