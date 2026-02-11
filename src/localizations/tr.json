@@ -155,5 +155,23 @@
     "kvkkSection4Content": "Kişisel verileriniz, KVKK'nın 5. ve 6. maddelerinde belirtilen hukuki sebeplere dayanarak işlenmektedir.",
     "kvkkSection5Title": "5. Haklarınız",
     "kvkkSection5Content": "KVKK'nın 11. maddesi uyarınca, kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme, işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme, yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme, eksik veya yanlış işlenmişse düzeltilmesini isteme, silinmesini veya yok edilmesini isteme haklarınız bulunmaktadır."
+  },
+  "ErrorPage": {
+    "404": {
+      "title": "Sayfa bulunamadı",
+      "description": "Aradığınız sayfa veya tarif mevcut değil. Ana sayfaya dönüp tarifleri keşfedebilirsiniz."
+    },
+    "403": {
+      "title": "Erişim engellendi",
+      "description": "Bu içeriğe erişim yetkiniz bulunmuyor. Giriş yapmayı deneyebilir veya ana sayfaya dönebilirsiniz."
+    },
+    "500": {
+      "title": "Bir şeyler yanlış gitti",
+      "description": "Sunucuda geçici bir sorun oluştu. Lütfen kısa süre sonra tekrar deneyin."
+    },
+    "backToHome": "Ana Sayfaya Dön",
+    "browseRecipes": "Tarifleri Keşfet",
+    "tryLogin": "Giriş Yap",
+    "tryAgain": "Tekrar Dene"
   }
 }

@@ -6,21 +6,31 @@ import { LocaleLoadingView } from '@/components/i18n/LocaleLoadingView';
 
 const LOCALES = ['tr', 'en'] as const;
 
+/** Loading ekranının en az gösterileceği süre (ms). Dil geçişi hissi için. */
+const MIN_LOADING_MS = 2200;
+
 function LocaleSwitchingContent() {
     const searchParams = useSearchParams();
     const locale = searchParams.get('locale');
     const next = searchParams.get('next') || '/';
 
     useEffect(() => {
-        if (!locale || !LOCALES.includes(locale as (typeof LOCALES)[number])) {
-            const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
-            window.location.href = base + next;
-            return;
-        }
         const base = process.env.NEXT_PUBLIC_BASE_PATH || '';
         const path = base && base !== '' ? base : '/';
+        const targetUrl = base + next;
+
+        if (!locale || !LOCALES.includes(locale as (typeof LOCALES)[number])) {
+            window.location.href = targetUrl;
+            return;
+        }
+
         document.cookie = `NEXT_LOCALE=${locale};path=${path};max-age=31536000;SameSite=Lax`;
-        window.location.href = base + next;
+
+        const id = setTimeout(() => {
+            window.location.href = targetUrl;
+        }, MIN_LOADING_MS);
+
+        return () => clearTimeout(id);
     }, [locale, next]);
 
     return <LocaleLoadingView />;

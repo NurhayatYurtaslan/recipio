@@ -85,7 +85,7 @@ export function Header() {
                         </div>
                     </form>
 
-                    {/* Actions */}
+                    {/* Giriş yapmamış: dil + tema header'da; giriş yapmış: ayarlar sadece Profil > Ayarlar */}
                     <div className="flex items-center gap-1 shrink-0">
                         {!user && (
                             <>

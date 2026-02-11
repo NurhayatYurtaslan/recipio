@@ -155,5 +155,23 @@
     "kvkkSection4Content": "Your personal data is processed based on the legal reasons specified in Articles 5 and 6 of the KVKK.",
     "kvkkSection5Title": "5. Your Rights",
     "kvkkSection5Content": "In accordance with Article 11 of the KVKK, you have the right to learn whether your personal data is being processed, request information if processed, learn the purpose of processing and whether it is used appropriately, know the third parties to whom it is transferred domestically or abroad, request correction if incomplete or incorrectly processed, and request deletion or destruction."
+  },
+  "ErrorPage": {
+    "404": {
+      "title": "Page not found",
+      "description": "The page or recipe you're looking for doesn't exist. Head back home and discover recipes."
+    },
+    "403": {
+      "title": "Access denied",
+      "description": "You don't have permission to view this content. Try signing in or return to the home page."
+    },
+    "500": {
+      "title": "Something went wrong",
+      "description": "We hit a temporary snag on our side. Please try again in a moment."
+    },
+    "backToHome": "Back to Home",
+    "browseRecipes": "Browse Recipes",
+    "tryLogin": "Sign in",
+    "tryAgain": "Try again"
   }
 }

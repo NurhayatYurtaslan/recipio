@@ -8,6 +8,50 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        'loading-fade': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.6' },
+        },
+        'loading-bounce': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
+        'loading-dot': {
+          '0%, 80%, 100%': { transform: 'scale(0.8)', opacity: '0.5' },
+          '40%': { transform: 'scale(1.2)', opacity: '1' },
+        },
+        'loading-stroke': {
+          '0%': { strokeDashoffset: '220' },
+          '100%': { strokeDashoffset: '0' },
+        },
+        'loading-rotate': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        'loading-rotate-reverse': {
+          '0%': { transform: 'rotate(360deg)' },
+          '100%': { transform: 'rotate(0deg)' },
+        },
+        'loading-shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
+        'loading-scale-in': {
+          '0%': { transform: 'scale(0.92)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+      animation: {
+        'loading-fade': 'loading-fade 1.8s ease-in-out infinite',
+        'loading-bounce': 'loading-bounce 1.2s ease-in-out infinite',
+        'loading-dot': 'loading-dot 0.8s ease-in-out infinite',
+        'loading-stroke': 'loading-stroke 1.2s ease-in-out infinite',
+        'loading-rotate': 'loading-rotate 1.8s linear infinite',
+        'loading-rotate-reverse': 'loading-rotate-reverse 2.2s linear infinite',
+        'loading-shimmer': 'loading-shimmer 2s ease-in-out infinite',
+        'loading-scale-in': 'loading-scale-in 0.4s ease-out forwards',
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

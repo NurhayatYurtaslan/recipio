@@ -43,11 +43,13 @@ interface ClientLocaleProviderProps {
 }
 
 export function ClientLocaleProvider({ initialLocale, initialMessages, messages, children }: ClientLocaleProviderProps) {
+    // Tek kaynak: sunucu initialLocale (cookie'den) + mount'ta cookie tekrar okunur; dil değişince /locale-switching ile full reload yapıldığı için tüm site güncellenir.
     const [locale, setLocaleState] = useState<Locale>(initialLocale);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setLocaleState(getLocaleFromCookie());
+        const fromCookie = getLocaleFromCookie();
+        setLocaleState(fromCookie);
         setMounted(true);
     }, []);
 

@@ -109,7 +109,7 @@ export function ProfileView() {
                 </div>
             </div>
 
-            {/* Settings */}
+            {/* Ayarlar: dil ve tema sadece giriş yapmış kullanıcılar için burada */}
             <div className="py-6 border-b border-border/60">
                 <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                     {t('settings')}
