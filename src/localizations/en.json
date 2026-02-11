@@ -32,8 +32,10 @@
     "portionLabel": "{count, plural, one {# person} other {# people}}",
     "noIngredients": "No ingredients listed",
     "favorite": "Favorite",
-    "save": "Save",
+    "addToFavorites": "Add to favorites",
+    "inFavorites": "In favorites",
     "share": "Share",
+    "linkCopied": "Link copied",
     "publishedOn": "Published on"
   },
   "Auth": {
@@ -77,6 +79,19 @@
     "viewAllCategories": "View All Categories",
     "discoverCategories": "Discover {count} categories",
     "backToHome": "Back to Home"
+  },
+  "Profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "favorites": "Favorites",
+    "noFavorites": "No favorite recipes yet.",
+    "email": "Email",
+    "displayName": "Display name",
+    "signedInAs": "Signed in as",
+    "loading": "Loading...",
+    "loadingFavorites": "Loading..."
   },
   "Footer": {
     "description": "Discover your favorite recipes, share them, and try new flavors.",

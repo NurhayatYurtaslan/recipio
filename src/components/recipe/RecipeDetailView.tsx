@@ -8,13 +8,11 @@ import {
     ArrowLeft, 
     Users, 
     Heart, 
-    Bookmark, 
     Share2, 
     Eye,
     MessageCircle,
     ChefHat,
     CheckCircle2,
-    UtensilsCrossed,
     Lightbulb,
     ShoppingBasket,
     ListOrdered
@@ -23,6 +21,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { RecipeDetail } from '@/lib/db/recipe-helpers';
 import { getLocalizedRecipeData, getIngredientsForServings } from '@/lib/db/recipe-helpers';
+import { createClient } from '@/lib/supabase/browser';
+import type { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 interface RecipeDetailViewProps {
     recipe: RecipeDetail;
@@ -32,12 +33,17 @@ interface RecipeDetailViewProps {
 export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
     const t = useTranslations('RecipeDetail');
     const localized = getLocalizedRecipeData(recipe, locale);
+    const router = useRouter();
     
     const availableServings = recipe.available_servings || [1, 2, 3, 4];
     const [selectedServings, setSelectedServings] = useState(availableServings[0] || 1);
     const [imageError, setImageError] = useState(false);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
     const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const [shareCopied, setShareCopied] = useState(false);
 
     const ingredients = getIngredientsForServings(recipe, selectedServings, locale);
     const steps = localized.steps || [];
@@ -46,6 +52,94 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
     useEffect(() => {
         setCheckedIngredients(new Set());
     }, [selectedServings]);
+
+    // Load auth user and check if recipe is already favorited
+    useEffect(() => {
+        const supabase = createClient();
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
+            const authUser = session?.user ?? null;
+            setCurrentUser(authUser);
+
+            if (authUser) {
+                const { data } = await supabase
+                    .from('favorites')
+                    .select('recipe_id')
+                    .eq('user_id', authUser.id)
+                    .eq('recipe_id', recipe.recipe_id);
+
+                if (data && data.length > 0) {
+                    setIsFavorite(true);
+                }
+            }
+        });
+    }, [recipe.recipe_id]);
+
+    const handleToggleFavorite = async () => {
+        if (favoriteLoading) return;
+
+        const supabase = createClient();
+
+        if (!currentUser) {
+            router.push('/login');
+            return;
+        }
+
+        setFavoriteLoading(true);
+        try {
+            if (isFavorite) {
+                const { error: delErr } = await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', currentUser.id)
+                    .eq('recipe_id', recipe.recipe_id);
+                // #region agent log
+                fetch('http://127.0.0.1:7244/ingest/309d5671-b7b2-4dcc-903e-8fda625e75f3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RecipeDetailView.tsx:favoriteDelete',message:'Favorite delete result',data:{recipe_id:recipe.recipe_id,user_id:currentUser.id,error:delErr?.message},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+                // #endregion
+                if (!delErr) setIsFavorite(false);
+            } else {
+                const { data: insData, error: insErr } = await supabase.from('favorites').insert({
+                    user_id: currentUser.id,
+                    recipe_id: recipe.recipe_id,
+                }).select('recipe_id');
+                // #region agent log
+                fetch('http://127.0.0.1:7244/ingest/309d5671-b7b2-4dcc-903e-8fda625e75f3',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RecipeDetailView.tsx:favoriteInsert',message:'Favorite insert result',data:{recipe_id:recipe.recipe_id,user_id:currentUser.id,error:insErr?.message,code:insErr?.code,inserted:!!insData?.length},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+                // #endregion
+                if (!insErr) setIsFavorite(true);
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+        } finally {
+            setFavoriteLoading(false);
+        }
+    };
+
+    const handleShare = async () => {
+        const url = typeof window !== 'undefined' ? window.location.href : '';
+        const title = localized.title || 'Recipe';
+        try {
+            if (typeof navigator !== 'undefined' && navigator.share) {
+                await navigator.share({
+                    title,
+                    url,
+                    text: title,
+                });
+            } else {
+                await navigator.clipboard.writeText(url);
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2000);
+            }
+        } catch (err) {
+            if ((err as Error).name !== 'AbortError') {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    setShareCopied(true);
+                    setTimeout(() => setShareCopied(false), 2000);
+                } catch {
+                    console.error('Share failed:', err);
+                }
+            }
+        }
+    };
 
     const toggleStep = (stepNumber: number) => {
         setCompletedSteps(prev => 
@@ -347,26 +441,41 @@ export function RecipeDetailView({ recipe, locale }: RecipeDetailViewProps) {
                             )}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-3 gap-2">
-                            <Button variant="outline" size="sm" className="flex-col h-auto py-3 gap-1">
-                                <Heart className="h-4 w-4" />
-                                <span className="text-xs">{t('favorite')}</span>
-                            </Button>
-                            <Button variant="outline" size="sm" className="flex-col h-auto py-3 gap-1">
-                                <Bookmark className="h-4 w-4" />
-                                <span className="text-xs">{t('save')}</span>
-                            </Button>
-                            <Button variant="outline" size="sm" className="flex-col h-auto py-3 gap-1">
-                                <Share2 className="h-4 w-4" />
-                                <span className="text-xs">{t('share')}</span>
-                            </Button>
+                        {/* Actions: single primary (Favorite) + secondary (Share) */}
+                        <div className="flex flex-col gap-3">
+                            <div className="flex gap-2">
+                                <Button
+                                    variant={isFavorite ? 'default' : 'outline'}
+                                    size="sm"
+                                    className="flex-1 gap-2 h-10"
+                                    onClick={handleToggleFavorite}
+                                    disabled={favoriteLoading}
+                                >
+                                    <Heart
+                                        className={`h-4 w-4 shrink-0 ${
+                                            isFavorite ? 'fill-current' : ''
+                                        }`}
+                                    />
+                                    <span className="text-sm font-medium">
+                                        {isFavorite ? t('inFavorites') : t('addToFavorites')}
+                                    </span>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2 h-10 px-4 shrink-0"
+                                    onClick={handleShare}
+                                >
+                                    <Share2 className="h-4 w-4" />
+                                    <span className="text-sm font-medium">
+                                        {shareCopied ? t('linkCopied') : t('share')}
+                                    </span>
+                                </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground text-center">
+                                {t('publishedOn')} {formatDate(recipe.created_at)}
+                            </p>
                         </div>
-
-                        {/* Meta Info */}
-                        <p className="text-xs text-muted-foreground text-center">
-                            {t('publishedOn')} {formatDate(recipe.created_at)}
-                        </p>
                     </div>
                 </div>
             </div>

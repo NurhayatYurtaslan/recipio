@@ -32,8 +32,10 @@
     "portionLabel": "{count, plural, one {# kişilik} other {# kişilik}}",
     "noIngredients": "Malzeme listesi yok",
     "favorite": "Favorile",
-    "save": "Kaydet",
+    "addToFavorites": "Favorilere ekle",
+    "inFavorites": "Favorilerde",
     "share": "Paylaş",
+    "linkCopied": "Link kopyalandı",
     "publishedOn": "Yayınlanma tarihi:"
   },
   "Auth": {
@@ -77,6 +79,19 @@
     "viewAllCategories": "Kategorilerin Tümünü Görüntüle",
     "discoverCategories": "{count} kategori keşfedin",
     "backToHome": "Ana Sayfaya Dön"
+  },
+  "Profile": {
+    "title": "Profil",
+    "settings": "Ayarlar",
+    "language": "Dil",
+    "theme": "Tema",
+    "favorites": "Favoriler",
+    "noFavorites": "Henüz favori tarifiniz yok.",
+    "email": "E-posta",
+    "displayName": "Görünen ad",
+    "signedInAs": "Giriş yapılan hesap",
+    "loading": "Yükleniyor...",
+    "loadingFavorites": "Yükleniyor..."
   },
   "Footer": {
     "description": "Favori tariflerinizi keşfedin, paylaşın ve yeni lezzetler deneyin.",

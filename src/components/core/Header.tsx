@@ -87,13 +87,17 @@ export function Header() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1 shrink-0">
-                        <ThemeToggle />
-                        <LanguageSwitcher />
-                        <div className="w-px h-4 bg-border/60 mx-1 hidden sm:block" />
+                        {!user && (
+                            <>
+                                <ThemeToggle />
+                                <LanguageSwitcher />
+                                <div className="w-px h-4 bg-border/60 mx-1 hidden sm:block" />
+                            </>
+                        )}
                         {user ? (
                             <>
                                 <Link
-                                    href="/home"
+                                    href="/profile"
                                     className={`flex items-center gap-1.5 px-2 py-1.5 rounded ${linkClass}`}
                                     title={displayName}
                                 >
