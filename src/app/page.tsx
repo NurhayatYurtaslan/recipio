@@ -10,21 +10,28 @@ import { getLocale } from 'next-intl/server';
 
 export default async function HomePage() {
     const locale = await getLocale();
-    
-    let featuredRecipes: any[] = [];
-    let categories: any[] = [];
-    
+
+    let featuredRecipes: Awaited<ReturnType<typeof getFeaturedRecipes>> = [];
+    let categories: Awaited<ReturnType<typeof getCategories>> = [];
+
     try {
         featuredRecipes = await getFeaturedRecipes(6);
     } catch (error) {
         console.error('Error fetching featured recipes:', error);
     }
-    
+
     try {
         categories = await getCategories(locale);
     } catch (error) {
         console.error('Error fetching categories:', error);
     }
+
+    const categoryNames = categories
+        .map((c: (typeof categories)[number]) => ({
+            slug: (c as { categories?: { slug?: string }; name?: string }).categories?.slug ?? '',
+            name: (c as { name?: string }).name ?? '',
+        }))
+        .filter((c) => c.slug);
 
     return (
         <SplashWrapper>
@@ -34,7 +41,11 @@ export default async function HomePage() {
                     <main className="flex-1">
                         <HomeHero />
                         <CategorySection categories={categories} locale={locale} />
-                        <FeaturedRecipesSection initialRecipes={featuredRecipes} locale={locale} />
+                        <FeaturedRecipesSection
+                            initialRecipes={featuredRecipes}
+                            locale={locale}
+                            categoryNames={categoryNames}
+                        />
                     </main>
                     <Footer />
                 </div>

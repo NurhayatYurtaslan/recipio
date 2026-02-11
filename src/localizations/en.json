@@ -9,6 +9,9 @@
   },
   "HomePage": {
     "featuredRecipes": "Featured Recipes",
+    "starsOfTheWeek": "Stars of the Week",
+    "mostLiked": "Most Liked",
+    "editorPicks": "Editor's Picks",
     "heroBadge": "Recipe Collection",
     "heroTitle": "Discover Amazing Recipes",
     "heroDescription": "Find your next favorite recipe from our curated collection",

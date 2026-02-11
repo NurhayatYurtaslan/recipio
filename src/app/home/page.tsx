@@ -12,6 +12,12 @@ export default async function HomePage() {
     const locale = await getLocale();
     const featuredRecipes = await getFeaturedRecipes(6);
     const categories = await getCategories(locale);
+    const categoryNames = categories
+        .map((c: (typeof categories)[number]) => ({
+            slug: (c as { categories?: { slug?: string }; name?: string }).categories?.slug ?? '',
+            name: (c as { name?: string }).name ?? '',
+        }))
+        .filter((c) => c.slug);
 
     return (
         <Providers>
@@ -20,7 +26,11 @@ export default async function HomePage() {
                 <main className="flex-1">
                     <HomeHero />
                     <CategorySection categories={categories} locale={locale} />
-                    <FeaturedRecipesSection initialRecipes={featuredRecipes} locale={locale} />
+                    <FeaturedRecipesSection
+                        initialRecipes={featuredRecipes}
+                        locale={locale}
+                        categoryNames={categoryNames}
+                    />
                 </main>
                 <Footer />
             </div>

@@ -9,6 +9,9 @@
   },
   "HomePage": {
     "featuredRecipes": "Öne Çıkan Tarifler",
+    "starsOfTheWeek": "Haftanın Yıldızları",
+    "mostLiked": "En Çok Beğenilenler",
+    "editorPicks": "Editörün Seçtikleri",
     "heroBadge": "Tarif Koleksiyonu",
     "heroTitle": "Harika Tarifler Keşfedin",
     "heroDescription": "Seçkin koleksiyonumuzdan bir sonraki favori tarifinizi bulun",
