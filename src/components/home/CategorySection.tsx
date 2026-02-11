@@ -2,10 +2,9 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import { CategoryCard } from '@/components/category/CategoryCard';
 import { transformCategoryToCardData, type CategoryCardData } from '@/lib/utils/category-helpers';
-import { ArrowRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 interface Category {
     category_id: number;
@@ -38,11 +37,20 @@ export function CategorySection({ categories, locale }: CategorySectionProps) {
 
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center mb-8">
-                <h2 className="text-2xl font-semibold mb-4">{t('browseByCategory')}</h2>
+            <div className="flex items-center justify-between gap-4 mb-6">
+                <h2 className="text-2xl font-semibold">{t('browseByCategory')}</h2>
+                {hasMoreCategories && (
+                    <Link
+                        href="/categories"
+                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        {tCategories('viewAllCategories')}
+                        <ChevronRight className="h-4 w-4 shrink-0" />
+                    </Link>
+                )}
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {featuredCategories.map((category) => (
                     <CategoryCard
                         key={category.id}
@@ -51,17 +59,6 @@ export function CategorySection({ categories, locale }: CategorySectionProps) {
                     />
                 ))}
             </div>
-
-            {hasMoreCategories && (
-                <div className="text-center">
-                    <Link href="/categories">
-                        <Button variant="outline" className="inline-flex items-center gap-2 px-6 py-2">
-                            {tCategories('viewAllCategories')}
-                            <ArrowRight className="h-4 w-4" />
-                        </Button>
-                    </Link>
-                </div>
-            )}
         </section>
     );
 }
